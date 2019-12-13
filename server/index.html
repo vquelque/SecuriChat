@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Peerster</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <h1>Peerster : The modern gen decentralized chat</h1>
+    <div class="content">
+      <div class="row">
+        <div class="column">
+
+          <div id="chatWrapper">
+            <div id="menu">
+              <p class="welcome">Welcome <span id="peerID"></span> !</p>
+              <div style="clear:both"></div>
+            </div>
+
+            <div id="chatbox">
+              <ul class="msgList"></ul>
+            </div>
+
+            <form id="chat">
+              <input name="message" type="text" id="message" size="63" />
+              <input type="button" id="send" value="Send !"></button>
+            </form>
+          </div>
+
+        </div>
+        <div class="column">
+          <div id="peerWrapper">
+            <h2>Known Peers :</h2>
+            <div class="peers">
+              <ul class="peerList"></ul>
+            </div>
+          </div>
+
+          <br />
+
+          <div id="contactsWrapper">
+            <h2>Contacts :</h2>
+            <div class="contacts"><ul class="contactList"></ul></div>
+          </div>
+
+          <br />
+
+          <div id="managePeerWrapper">
+            <h2>Manage peers :</h2>
+            <p>Enter peer address to add/remove this peer :</p>
+            <br />
+            <form action="/peers" method="post">
+              <input
+                type="text"
+                name="peerAddr"
+                id="peerAddr"
+                placeholder="Peer address"
+              />
+              <button type="submit">Add/Remove</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <!-- custom JS -->
+  <script src="main.js"></script>
+</html>
