@@ -53,7 +53,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 func (gsp *Gossiper) rumormonger(rumor *message.RumorMessage, peerAddr string) {
 	go gsp.listenForAck(rumor, peerAddr)
 	gsp.sendRumorMessage(rumor, peerAddr)
-	//fmt.Printf("MONGERING with %s \n", peerAddr)
+	fmt.Printf("MONGERING with %s \n", peerAddr)
 }
 
 // Listen and handle ack or timeout.
@@ -72,13 +72,11 @@ func (gsp *Gossiper) listenForAck(rumor *message.RumorMessage, peerAddr string) 
 		select {
 		case <-timer.C:
 			gsp.coinFlip(rumor, peerAddr)
-			//	fmt.Printf("TIMEOUT \n")
 			return
 		case ack := <-channel:
 			if ack {
 				gsp.coinFlip(rumor, peerAddr)
 			}
-			//	fmt.Printf("GOT ACK \n")
 			return
 		}
 	}

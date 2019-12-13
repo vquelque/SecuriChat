@@ -69,7 +69,7 @@ func (peersSet *Peers) PickRandomPeer(sender string) string {
 	if peersSet.Size() == 0 {
 		return ""
 	}
-	slice := peersSet.GetAllPeers()
+	slice := peersSet.getAllPeers()
 	i1 := rand.Intn(len(slice))
 	p1 := slice[i1]
 
@@ -87,6 +87,14 @@ func (peersSet *Peers) PickRandomPeer(sender string) string {
 func (peerSet *Peers) GetAllPeers() []string {
 	peerSet.lock.RLock()
 	defer peerSet.lock.RUnlock()
+	peerList := make([]string, 0)
+	for peer := range peerSet.peers {
+		peerList = append(peerList, peer)
+	}
+	return peerList
+}
+
+func (peerSet *Peers) getAllPeers() []string {
 	peerList := make([]string, 0)
 	for peer := range peerSet.peers {
 		peerList = append(peerList, peer)
