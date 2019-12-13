@@ -66,7 +66,7 @@ func (peersSet *Peers) PickRandomPeer(sender string) string {
 	defer peersSet.lock.RUnlock()
 	//pick a peer at random in the set except the peer given as argument
 	//returns nil if no other peer int the set
-	if peersSet.Size() == 0 {
+	if peersSet.size() == 0 {
 		return ""
 	}
 	slice := peersSet.getAllPeers()
@@ -102,9 +102,7 @@ func (peerSet *Peers) getAllPeers() []string {
 	return peerList
 }
 
-func (peerSet *Peers) Size() int {
-	peerSet.lock.RLock()
-	defer peerSet.lock.RUnlock()
+func (peerSet *Peers) size() int {
 	size := len(peerSet.peers)
 	return size
 }
