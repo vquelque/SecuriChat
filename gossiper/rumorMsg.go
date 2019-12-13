@@ -115,7 +115,6 @@ func (gsp *Gossiper) synchronizeWithPeer(same bool, toAsk []vector.PeerStatus, t
 		}
 	} else if len(toAsk) > 0 {
 		// send status for triggering peer mongering
-		fmt.Println(toAsk)
 		gsp.sendStatusPacket(peerAddr)
 	}
 }
