@@ -38,8 +38,6 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		randPeer := gsp.Peers.PickRandomPeer(sender)
 		if randPeer != "" {
 			gsp.rumormonger(msg, randPeer)
-		} else {
-			//	log.Print("No other peers to forward rumor message")
 		}
 	}
 
