@@ -3,12 +3,10 @@ package main
 import (
 	"flag"
 
+	"github.com/vquelque/Peerster/constant"
 	"github.com/vquelque/Peerster/gossiper"
 	"github.com/vquelque/Peerster/server"
 )
-
-const defaultAntiEntropy = 10 //in seconds
-const defaultRTimer = 0       //in seconds
 
 func main() {
 	uiPort := flag.Int("UIPort", 8080, "Port for the UI client (default 8080)")
@@ -23,11 +21,11 @@ func main() {
 
 	antiEntropyTimer := *antiEntropy
 	if antiEntropyTimer < 0 {
-		antiEntropyTimer = defaultAntiEntropy
+		antiEntropyTimer = constant.DefaultAntiEntropy
 	}
 	rtimer := *rtimerFlag
 	if rtimer < 0 {
-		rtimer = defaultRTimer
+		rtimer = constant.DefaultRTimer
 	}
 
 	gossiper := gossiper.NewGossiper(*gossipAddr, *name, *uiPort, *peersList, *simple, antiEntropyTimer, rtimer)

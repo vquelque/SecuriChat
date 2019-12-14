@@ -12,13 +12,6 @@ import (
 
 // Procecces incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
-	//if sender is nil then it is a client message
-	if sender != "" {
-		if msg.Origin != gsp.Name {
-			fmt.Println(msg.PrintRumor(sender))
-			fmt.Println(gsp.Peers.PrintPeers())
-		}
-	}
 
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
@@ -33,6 +26,13 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		// increase mID for peer and store message
 		gsp.VectorClock.IncrementMIDForPeer(msg.Origin)
 		gsp.RumorStorage.Store(msg)
+		//if sender is nil then it is a client message
+		if sender != "" {
+			if msg.Origin != gsp.Name {
+				fmt.Println(msg.PrintRumor(sender))
+				fmt.Println(gsp.Peers.PrintPeers())
+			}
+		}
 		//TODO CLEANLY STORE IN UIStorage
 		//pick random peer and rumormonger
 		randPeer := gsp.Peers.PickRandomPeer(sender)
