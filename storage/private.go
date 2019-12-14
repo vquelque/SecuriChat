@@ -3,7 +3,7 @@ package storage
 import (
 	"sync"
 
-	"github.com/vquelque/Peerster/message"
+	"github.com/vquelque/SecuriChat/message"
 )
 
 type PrivateStorage struct {

@@ -3,18 +3,18 @@ package message
 import (
 	"fmt"
 
-	"github.com/vquelque/Peerster/constant"
-	"github.com/vquelque/Peerster/utils"
+	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/utils"
 )
 
-// SimpleMessage represents a type of Peerster message containing only text.
+// SimpleMessage represents a type of SecuriChat message containing only text.
 type SimpleMessage struct {
 	OriginalName  string
 	RelayPeerAddr string
 	Contents      string
 }
 
-//RumorMessage represents a type of Peerster message to be gossiped.
+//RumorMessage represents a type of SecuriChat message to be gossiped.
 type RumorMessage struct {
 	Origin string
 	ID     uint32

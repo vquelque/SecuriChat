@@ -3,8 +3,8 @@ package gossiper
 import (
 	"fmt"
 
-	"github.com/vquelque/Peerster/constant"
-	"github.com/vquelque/Peerster/message"
+	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/message"
 )
 
 // ProcessClientMessage processes client messages

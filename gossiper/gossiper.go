@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/dedis/protobuf"
-	"github.com/vquelque/Peerster/constant"
-	"github.com/vquelque/Peerster/message"
-	"github.com/vquelque/Peerster/observer"
-	"github.com/vquelque/Peerster/peers"
-	"github.com/vquelque/Peerster/routing"
-	"github.com/vquelque/Peerster/socket"
-	"github.com/vquelque/Peerster/storage"
-	"github.com/vquelque/Peerster/vector"
+	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/message"
+	"github.com/vquelque/SecuriChat/observer"
+	"github.com/vquelque/SecuriChat/peers"
+	"github.com/vquelque/SecuriChat/routing"
+	"github.com/vquelque/SecuriChat/socket"
+	"github.com/vquelque/SecuriChat/storage"
+	"github.com/vquelque/SecuriChat/vector"
 )
 
 // Gossiper main structure

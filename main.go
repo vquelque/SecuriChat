@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 
-	"github.com/vquelque/Peerster/constant"
-	"github.com/vquelque/Peerster/gossiper"
-	"github.com/vquelque/Peerster/server"
+	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/gossiper"
+	"github.com/vquelque/SecuriChat/server"
 )
 
 func main() {

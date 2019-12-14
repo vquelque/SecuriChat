@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/vquelque/Peerster/utils"
+	"github.com/vquelque/SecuriChat/utils"
 )
 
 const MaxBufferSize = 65535

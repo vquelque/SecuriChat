@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vquelque/Peerster/message"
+	"github.com/vquelque/SecuriChat/message"
 )
 
 // Routing struct is a RoutingTable

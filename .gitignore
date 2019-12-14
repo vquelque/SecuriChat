@@ -36,7 +36,7 @@
 # End of https://www.gitignore.io/api/go,visualstudiocode
 
 #Executable
-Peerster
+SecuriChat
 
 #Files
 client/client

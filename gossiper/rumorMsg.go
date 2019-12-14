@@ -5,9 +5,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/vquelque/Peerster/constant"
-	"github.com/vquelque/Peerster/message"
-	"github.com/vquelque/Peerster/vector"
+	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/message"
+	"github.com/vquelque/SecuriChat/vector"
 )
 
 // Procecces incoming rumor message.

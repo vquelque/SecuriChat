@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vquelque/Peerster/vector"
+	"github.com/vquelque/SecuriChat/vector"
 )
 
 // Sends a status packet to the given address.

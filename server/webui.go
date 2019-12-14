@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/vquelque/Peerster/gossiper"
-	"github.com/vquelque/Peerster/message"
-	"github.com/vquelque/Peerster/utils"
+	"github.com/vquelque/SecuriChat/gossiper"
+	"github.com/vquelque/SecuriChat/message"
+	"github.com/vquelque/SecuriChat/utils"
 )
 
 func peersListHandler(gsp *gossiper.Gossiper) http.HandlerFunc {

@@ -7,7 +7,7 @@ import (
 	"net"
 
 	"github.com/dedis/protobuf"
-	"github.com/vquelque/Peerster/message"
+	"github.com/vquelque/SecuriChat/message"
 )
 
 func main() {

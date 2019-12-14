@@ -3,7 +3,7 @@ package gossiper
 import (
 	"fmt"
 
-	"github.com/vquelque/Peerster/message"
+	"github.com/vquelque/SecuriChat/message"
 )
 
 func (gsp *Gossiper) processPrivateMessage(msg *message.PrivateMessage) {

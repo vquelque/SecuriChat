@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vquelque/Peerster/vector"
+	"github.com/vquelque/SecuriChat/vector"
 )
 
 // Observer structure used for callback to routine
