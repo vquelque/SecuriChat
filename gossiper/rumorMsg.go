@@ -2,6 +2,9 @@ package gossiper
 
 import (
 	"fmt"
+	"github.com/coyim/otr3"
+	"github.com/vquelque/SecuriChat/encConversation"
+	"log"
 	"math/rand"
 	"time"
 
@@ -12,6 +15,9 @@ import (
 
 // Procecces incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
+
+	log.Println("rumor received")
+
 
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
@@ -29,21 +35,98 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		//if sender is nil then it is a client message
 		if sender != "" {
 			if msg.Origin != gsp.Name {
+				gsp.handleEncryptedMessage(msg)
 				fmt.Println(msg.PrintRumor(sender))
 				fmt.Println(gsp.Peers.PrintPeers())
+
 			}
 		}
 		//TODO CLEANLY STORE IN UIStorage
 		//pick random peer and rumormonger
-		randPeer := gsp.Peers.PickRandomPeer(sender)
-		if randPeer != "" {
-			gsp.rumormonger(msg, randPeer)
-		}
+		log.Println("sending message")
+		gsp.sendRumor(sender, msg)
 	}
 
 	// acknowledge the packet if not sent by client
 	if sender != "" {
 		gsp.sendStatusPacket(sender)
+	}
+}
+
+func (gsp *Gossiper) sendRumor(sender string, msg *message.RumorMessage) {
+	randPeer := gsp.Peers.PickRandomPeer(sender)
+	if randPeer != "" {
+		gsp.rumormonger(msg, randPeer)
+	}
+}
+
+func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
+	encryptedMessage := msg.EncryptedMessage
+	if encryptedMessage != nil {
+		log.Println("handling enc msg")
+		if encryptedMessage.Dest != gsp.Name{
+			log.Println("not me!")
+			return
+		}
+		//Get conversation
+		cs,ok := gsp.convStateMap.Load(msg.Origin)
+		if !ok{
+			log.Println("create conv")
+			cs = gsp.CreateConversationState()
+			gsp.convStateMap.Update(msg.Origin, cs)
+		}
+
+		plaintxt,toSend, err := cs.Conversation.Receive(encryptedMessage.Message)
+		if err != nil{
+			log.Fatal(err.Error())
+		}
+		if cs.Step == encConversation.AKE_Finished{
+			// A message was received
+			fmt.Printf("RECEIVED ENCR MESSAGE : \n %s \n ",plaintxt)
+		}else{
+			if encryptedMessage.Step < encConversation.Sig{
+
+				log.Println("state is : ", cs.Step)
+				log.Printf("Doing key exchange, step %d \n",encryptedMessage.Step+1)
+				cs.Step= encryptedMessage.Step+1
+				log.Println("state final is : ", cs.Step)
+				mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
+				encMsg := &encConversation.EncryptedMessage{
+					Message: toSend[0],
+					Step:   cs.Step,
+					Dest:    msg.Origin,
+				}
+				rumor := message.NewRumorMessageWithEncryptedData(gsp.Name,mID,encMsg)
+				gsp.processRumorMessage(rumor,"")
+
+				if cs.Step == encConversation.Sig{
+					cs.Step = encConversation.AKE_Finished
+					log.Println("Sending hello msg")
+					toSend, _ := cs.Conversation.Send(otr3.ValidMessage("hello"))
+
+					mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
+					encMsg := &encConversation.EncryptedMessage{
+						Message: toSend[0],
+						Step:   cs.Step,
+						Dest:    msg.Origin,
+					}
+					rumor := message.NewRumorMessageWithEncryptedData(gsp.Name,mID,encMsg)
+					gsp.processRumorMessage(rumor,"")
+
+				}
+
+
+
+			} else if encryptedMessage.Step == encConversation.Sig {
+				log.Println("Key exchange is finished")
+				cs.Step = encConversation.AKE_Finished
+
+			}else {
+				log.Println("Unexpected state : ",encryptedMessage.Step)
+			}
+		}
+	}else {
+		log.Println("rumor message")
 	}
 }
 

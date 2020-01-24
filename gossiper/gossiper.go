@@ -1,7 +1,11 @@
 package gossiper
 
 import (
+	"crypto/rand"
 	"fmt"
+	"github.com/coyim/otr3"
+	"github.com/vquelque/SecuriChat/encConversation"
+	"log"
 	"sync"
 	"time"
 
@@ -32,6 +36,8 @@ type Gossiper struct {
 	ResetAntiEntropyTimer chan bool
 	Routing               *routing.Routing
 	Rtimer                int
+	convStateMap          *encConversation.ConvStateMap
+	privateKey            *otr3.DSAPrivateKey
 }
 
 // GossipPacket is the only type of packet sent to other peers.
@@ -63,6 +69,8 @@ func NewGossiper(address string, name string, uiPort int, peersList string, simp
 	resetAntiEntropyChan := make(chan (bool))
 	routing := routing.NewRoutingTable()
 
+	priv := &otr3.DSAPrivateKey{}
+	_ = priv.Generate(rand.Reader)
 	return &Gossiper{
 		Name:                  name,
 		Peers:                 peersSet,
@@ -78,6 +86,8 @@ func NewGossiper(address string, name string, uiPort int, peersList string, simp
 		ResetAntiEntropyTimer: resetAntiEntropyChan,
 		Routing:               routing,
 		Rtimer:                rtimer,
+		convStateMap:          encConversation.InitConvStateMap(),
+		privateKey:            priv,
 	}
 }
 
@@ -89,7 +99,7 @@ func NewGossiper(address string, name string, uiPort int, peersList string, simp
 func (gsp *Gossiper) send(gossipPacket *GossipPacket, addr string) {
 	pkt, err := protobuf.Encode(gossipPacket)
 	if err != nil {
-		//log.Print(err)
+		log.Print(err)
 	}
 	gsp.PeersSocket.Send(pkt, addr)
 }
@@ -173,7 +183,7 @@ func (gsp *Gossiper) processMessages(peerMsgs <-chan *receivedPackets, clientMsg
 				gsp.Peers.Add(peerMsg.sender)
 			}
 			if err != nil {
-				// log.Print(err)
+				log.Print(err)
 			}
 			switch {
 			case gp.Simple != nil:
@@ -181,11 +191,12 @@ func (gsp *Gossiper) processMessages(peerMsgs <-chan *receivedPackets, clientMsg
 				go gsp.processSimpleMessage(gp.Simple)
 			case gp.RumorMessage != nil:
 				// received a rumorMessage
-				go gsp.processRumorMessage(gp.RumorMessage, peerMsg.sender)
+				 gsp.processRumorMessage(gp.RumorMessage, peerMsg.sender)
 			case gp.StatusPacket != nil:
 				go gsp.processStatusPacket(gp.StatusPacket, peerMsg.sender)
 			case gp.Private != nil:
 				go gsp.processPrivateMessage(gp.Private)
+
 			}
 		case cliMsg := <-clientMsgs:
 			msg := &message.Message{}
@@ -219,3 +230,5 @@ func (gsp *Gossiper) Start() {
 		gsp.startRoutingMessageHandler()
 	}
 }
+
+

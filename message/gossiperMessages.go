@@ -2,6 +2,8 @@ package message
 
 import (
 	"fmt"
+	"github.com/coyim/otr3"
+	"github.com/vquelque/SecuriChat/encConversation"
 
 	"github.com/vquelque/SecuriChat/constant"
 	"github.com/vquelque/SecuriChat/utils"
@@ -19,7 +21,9 @@ type RumorMessage struct {
 	Origin string
 	ID     uint32
 	Text   string
+	EncryptedMessage *encConversation.EncryptedMessage
 }
+
 
 //PrivateMessage between 2 peers
 type PrivateMessage struct {
@@ -28,6 +32,7 @@ type PrivateMessage struct {
 	Text        string
 	Destination string
 	HopLimit    uint32
+	msg []otr3.ValidMessage
 }
 
 type DataRequest struct {
@@ -45,6 +50,8 @@ type DataReply struct {
 	Data        []byte
 }
 
+
+
 //NewSimpleMessage creates a new simpleMessage.
 func NewSimpleMessage(contents string, originalName string, relayPeerAddr string) *SimpleMessage {
 	return &SimpleMessage{
@@ -60,6 +67,15 @@ func NewRumorMessage(origin string, ID uint32, text string) *RumorMessage {
 		Origin: origin,
 		ID:     ID,
 		Text:   text,
+	}
+}
+
+//NewRumorMessage creates a new EncryptedRumorMessage.
+func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *encConversation.EncryptedMessage) *RumorMessage {
+	return &RumorMessage{
+		Origin: origin,
+		ID:     ID,
+		EncryptedMessage:   message,
 	}
 }
 

@@ -1,20 +1,28 @@
-package encConversation
+package gossiper
 
 import (
-	"crypto/rand"
 	"github.com/coyim/otr3"
+	"github.com/vquelque/SecuriChat/encConversation"
 )
 
-func CreateConversation() (c *otr3.Conversation){
-	var priv *otr3.DSAPrivateKey
-	priv.Generate(rand.Reader)
+func (gsp *Gossiper) CreateConversationState() (cs *encConversation.ConversationState){
+	c := &otr3.Conversation{}
+	priv := gsp.loadPrivateKey()
 	c.SetOurKeys([]otr3.PrivateKey{priv})
 
 	// set the Policies.
 	c.Policies.RequireEncryption()
-	c.Policies.AllowV2()
 	c.Policies.AllowV3()
-	c.Policies.SendWhitespaceTag()
-	c.Policies.WhitespaceStartAKE()
-	return c
+	cs =  &encConversation.ConversationState{
+		IsFinished:   false,
+		Step:         0,
+		Conversation: c,
+	}
+
+
+	return cs
+}
+
+func (gsp *Gossiper) loadPrivateKey() *otr3.DSAPrivateKey {
+	return gsp.privateKey
 }

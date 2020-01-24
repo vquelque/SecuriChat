@@ -15,6 +15,7 @@ func main() {
 	uiPort := flag.Int("UIPort", 8080, "Port for the UI client (default 8080)")
 	text := flag.String("msg", "", "message to be sent; if the -dest flag is present, this is a private message, otherwise it’s a rumor message")
 	destination := flag.String("dest", "", "destination for the private message. can be omitted")
+	encrypted := flag.Bool("encrypted",false,"encrypted message")
 
 	flag.Parse()
 
@@ -35,12 +36,13 @@ func main() {
 	} else {
 		log.Fatal("ERROR (Bad argument combination)")
 	}
-
+	msg.Encrypted = *encrypted
 	pkt, err := protobuf.Encode(msg)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 
 	_, err = udpConn.WriteToUDP(pkt, udpAddr)
 	if err == nil {
