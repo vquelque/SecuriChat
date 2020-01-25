@@ -5,6 +5,8 @@ import (
 	"github.com/vquelque/SecuriChat/encConversation"
 )
 
+const maxBufferSize  = 100
+
 func (gsp *Gossiper) CreateConversationState() (cs *encConversation.ConversationState){
 	c := &otr3.Conversation{}
 	priv := gsp.loadPrivateKey()
@@ -14,13 +16,22 @@ func (gsp *Gossiper) CreateConversationState() (cs *encConversation.Conversation
 	c.Policies.RequireEncryption()
 	c.Policies.AllowV3()
 	cs =  &encConversation.ConversationState{
-		IsFinished:   false,
 		Step:         0,
 		Conversation: c,
+		Buffer: make(chan string,maxBufferSize),
 	}
 
 
 	return cs
+}
+
+func (gsp *Gossiper) createOrLoadConversationState(dest string) (*encConversation.ConversationState,bool) {
+	cs, ok := gsp.convStateMap.Load(dest)
+	if !ok {
+		cs = gsp.CreateConversationState()
+		gsp.convStateMap.Update(dest, cs)
+	}
+	return cs,ok
 }
 
 func (gsp *Gossiper) loadPrivateKey() *otr3.DSAPrivateKey {

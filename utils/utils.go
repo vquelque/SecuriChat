@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"io"
 	"net"
@@ -57,4 +59,15 @@ func SliceToHash(hash []byte) SHA256 {
 	var h SHA256
 	copy(h[:], hash)
 	return h
+}
+
+func Hash(data []byte)SHA256  {
+	return sha256.Sum256(data)
+}
+
+
+func EncodeUint64(i uint64) []byte {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, i)
+	return b
 }

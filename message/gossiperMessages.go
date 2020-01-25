@@ -3,9 +3,9 @@ package message
 import (
 	"fmt"
 	"github.com/coyim/otr3"
-	"github.com/vquelque/SecuriChat/encConversation"
-
 	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/encConversation"
+	"github.com/vquelque/SecuriChat/pow"
 	"github.com/vquelque/SecuriChat/utils"
 )
 
@@ -21,6 +21,7 @@ type RumorMessage struct {
 	Origin string
 	ID     uint32
 	Text   string
+	PoW    pow.ProofOfWork
 	EncryptedMessage *encConversation.EncryptedMessage
 }
 
@@ -77,6 +78,14 @@ func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *encConv
 		ID:     ID,
 		EncryptedMessage:   message,
 	}
+}
+
+func (msg *RumorMessage) Encode() []byte {
+	b := utils.EncodeUint64(uint64(msg.ID))
+	b = append(b, []byte(msg.Origin)...)
+	b = append(b, msg.EncryptedMessage.Encode()...)
+	b = append(b, msg.Text...)
+	return b
 }
 
 //NewPrivateMessage creates a new private message for peer dest (dest is peer identifier not address).

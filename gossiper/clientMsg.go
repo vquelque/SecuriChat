@@ -25,25 +25,12 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 			//rumor message
 			if msg.Encrypted{
 				log.Println("Send encr msg")
-				msge := []byte("?OTRv3?")
-				cs,ok := gsp.convStateMap.Load(msg.Destination)
+				cs,ok := gsp.createOrLoadConversationState(msg.Destination)
+				cs.Buffer<-msg.Text
 				if !ok{
-					cs = gsp.CreateConversationState()
-					gsp.convStateMap.Update(msg.Destination, cs)
+					log.Println("Creating conversation")
+				gsp.sendEncryptedTextMessage(cs,encConversation.QueryTextMessage,msg.Destination)
 				}
-				toSend,err := cs.Conversation.Send(msge)
-				if err!=nil{
-					log.Fatal(err.Error())
-				}
-				mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
-				encMsg := &encConversation.EncryptedMessage{
-					Message: toSend[0],
-					Step:   cs.Step,
-					Dest:    msg.Destination,
-				}
-				rumor := message.NewRumorMessageWithEncryptedData(gsp.Name,mID,encMsg)
-				gsp.processRumorMessage(rumor, "")
-
 				return
 			}
 			mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
@@ -52,3 +39,5 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 		}
 	}
 }
+
+

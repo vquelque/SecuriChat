@@ -2,7 +2,6 @@ package gossiper
 
 import (
 	"fmt"
-
 	"github.com/vquelque/SecuriChat/message"
 )
 
