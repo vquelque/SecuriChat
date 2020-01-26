@@ -19,7 +19,6 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 
 	log.Println("rumor received")
 
-
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
 		gsp.Routing.UpdateRoute(msg, sender) //update routing table
@@ -35,10 +34,9 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 				log.Println("WARNING : Invalid PoW")
 				return
 			}
-		}else{
+		} else {
 			msg.PoW = pow.NewProofOfWork(msg.Encode())
 		}
-
 
 		// we were waiting for this message
 		// increase mID for peer and store message
@@ -76,30 +74,29 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	encryptedMessage := msg.EncryptedMessage
 	if encryptedMessage != nil {
 		log.Println("handling enc msg")
-		if encryptedMessage.Dest != gsp.Name{
+		if encryptedMessage.Dest != gsp.Name {
 			log.Println("not me!")
 			return
 		}
 		//Get conversation
-		cs,_ := gsp.createOrLoadConversationState(msg.Origin)
-		if encryptedMessage.Step == 0 && cs.Step>0{
+		cs, _ := gsp.createOrLoadConversationState(msg.Origin)
+		if encryptedMessage.Step == 0 && cs.Step > 0 {
 			log.Println("Re-Doing key exchange")
-			gsp.convStateMap.Update(msg.Origin,nil)
-			cs,_ =gsp.createOrLoadConversationState(msg.Origin)
+			gsp.convStateMap.Update(msg.Origin, nil)
+			cs, _ = gsp.createOrLoadConversationState(msg.Origin)
 		}
 
-		plaintxt,toSend, err := cs.Conversation.Receive(encryptedMessage.Message)
-		if err != nil{
+		plaintxt, toSend, err := cs.Conversation.Receive(encryptedMessage.Message)
+		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-
 		switch encryptedMessage.Step {
-		case encConversation.QueryMsg,encConversation.DHCommit,
-		encConversation.DHKey,encConversation.RevealSig:
+		case encConversation.QueryMsg, encConversation.DHCommit,
+			encConversation.DHKey, encConversation.RevealSig:
 			log.Println("state is : ", cs.Step)
-			log.Printf("Doing key exchange, step %d \n",encryptedMessage.Step+1)
-			cs.Step= encryptedMessage.Step+1
+			log.Printf("Doing key exchange, step %d \n", encryptedMessage.Step+1)
+			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
@@ -127,15 +124,15 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 }
 
 func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationState, msg *message.RumorMessage) {
-		for textMessage := range cs.Buffer {
-			gsp.sendEncryptedTextMessage(cs, textMessage, msg.Origin)
-		}
+	for textMessage := range cs.Buffer {
+		gsp.sendEncryptedTextMessage(cs, textMessage, msg.Origin)
+	}
 }
 
 func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConversation.ConversationState, dest string) {
 	log.Println("Sending encryptedMessage")
 	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
-	encMsg := &encConversation.EncryptedMessage{
+	encMsg := &message.EncryptedMessage{
 		Message: toSend,
 		Step:    cs.Step,
 		Dest:    dest,
@@ -146,7 +143,7 @@ func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConve
 
 func (gsp *Gossiper) sendEncryptedTextMessage(cs *encConversation.ConversationState, text string, dest string) {
 	toSend, _ := cs.Conversation.Send(otr3.ValidMessage(text))
-	gsp.sendEncryptedMessage(toSend[0],cs,dest)
+	gsp.sendEncryptedMessage(toSend[0], cs, dest)
 }
 
 // Handle the rumormongering process and launch go routine that listens for ack or timeout.
