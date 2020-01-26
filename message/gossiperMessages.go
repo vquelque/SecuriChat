@@ -2,9 +2,9 @@ package message
 
 import (
 	"fmt"
+
 	"github.com/coyim/otr3"
 	"github.com/vquelque/SecuriChat/constant"
-	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
 	"github.com/vquelque/SecuriChat/utils"
 )
@@ -18,13 +18,12 @@ type SimpleMessage struct {
 
 //RumorMessage represents a type of SecuriChat message to be gossiped.
 type RumorMessage struct {
-	Origin string
-	ID     uint32
-	Text   string
-	PoW    pow.ProofOfWork
-	EncryptedMessage *encConversation.EncryptedMessage
+	Origin           string
+	ID               uint32
+	Text             string
+	PoW              pow.ProofOfWork
+	EncryptedMessage *EncryptedMessage
 }
-
 
 //PrivateMessage between 2 peers
 type PrivateMessage struct {
@@ -33,7 +32,7 @@ type PrivateMessage struct {
 	Text        string
 	Destination string
 	HopLimit    uint32
-	msg []otr3.ValidMessage
+	msg         []otr3.ValidMessage
 }
 
 type DataRequest struct {
@@ -51,7 +50,13 @@ type DataReply struct {
 	Data        []byte
 }
 
+type EncryptedMessage struct {
+	Message otr3.ValidMessage
+	Step    int
+	Dest    string
+}
 
+type RSAEncryptedMessage []byte
 
 //NewSimpleMessage creates a new simpleMessage.
 func NewSimpleMessage(contents string, originalName string, relayPeerAddr string) *SimpleMessage {
@@ -72,19 +77,19 @@ func NewRumorMessage(origin string, ID uint32, text string) *RumorMessage {
 }
 
 //NewRumorMessage creates a new EncryptedRumorMessage.
-func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *encConversation.EncryptedMessage) *RumorMessage {
+func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *EncryptedMessage) *RumorMessage {
 	return &RumorMessage{
-		Origin: origin,
-		ID:     ID,
-		EncryptedMessage:   message,
+		Origin:           origin,
+		ID:               ID,
+		EncryptedMessage: message,
 	}
 }
 
 func (msg *RumorMessage) Encode() []byte {
 	b := utils.EncodeUint64(uint64(msg.ID))
 	b = append(b, []byte(msg.Origin)...)
-	if msg.EncryptedMessage !=nil{
-	b = append(b, msg.EncryptedMessage.Encode()...)
+	if msg.EncryptedMessage != nil {
+		b = append(b, msg.EncryptedMessage.Encode()...)
 	}
 	b = append(b, msg.Text...)
 	return b
@@ -159,4 +164,11 @@ func (msg *SimpleMessage) String() string {
 func (msg *PrivateMessage) String() string {
 	return fmt.Sprintf("PRIVATE origin %s hop-limit %d contents %s",
 		msg.Origin, msg.HopLimit, msg.Text)
+}
+
+func (enc *EncryptedMessage) Encode() []byte {
+	b := utils.EncodeUint64(uint64(enc.Step))
+	b = append(b, []byte(enc.Dest)...)
+	b = append(b, enc.Message...)
+	return b
 }

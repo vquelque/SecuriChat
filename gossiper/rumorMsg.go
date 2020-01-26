@@ -153,7 +153,7 @@ func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationStat
 func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConversation.ConversationState, dest string) {
 	log.Println("Sending encryptedMessage")
 	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
-	encMsg := &encConversation.EncryptedMessage{
+	encMsg := &message.EncryptedMessage{
 		Message: toSend,
 		Step:    cs.Step,
 		Dest:    dest,

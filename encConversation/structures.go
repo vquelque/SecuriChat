@@ -1,9 +1,9 @@
 package encConversation
 
 import (
-	"github.com/coyim/otr3"
-	"github.com/vquelque/SecuriChat/utils"
 	"sync"
+
+	"github.com/coyim/otr3"
 )
 
 const (
@@ -21,19 +21,6 @@ const (
 
 	QueryTextMessage = "?OTRv3?"
 )
-
-type EncryptedMessage struct {
-	Message otr3.ValidMessage
-	Step    int
-	Dest    string
-}
-
-func (enc *EncryptedMessage) Encode() []byte {
-	b := utils.EncodeUint64(uint64(enc.Step))
-	b = append(b, []byte(enc.Dest)...)
-	b = append(b, enc.Message...)
-	return b
-}
 
 type ConversationState struct {
 	Step         int // step of the Auth. Key. Exchange (AKE)
