@@ -35,8 +35,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					cs.Buffer <- msg.Text
 					return
 				} else if msg.AuthQuestion != "" {
-					log.Println("Requested authentication with question ", msg.AuthQuestion)
-					log.Println("Requested authentication with expected answer ", msg.AuthAnswer)
+					log.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion,msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
 						log.Panic("convo didn't exist")

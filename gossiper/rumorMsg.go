@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/vquelque/SecuriChat/constant"
@@ -125,6 +126,8 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			fmt.Printf("Enter the secret for the question %s : \n", question)
 			secret, _ := reader.ReadString('\n')
 			fmt.Printf("Secret is %s",secret)
+			secret = removeEndOfLine(secret)
+			fmt.Print(secret)
 			toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
 			if err != nil {
 				log.Panic(err.Error())
@@ -147,6 +150,12 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	} else {
 		log.Println("rumor message")
 	}
+}
+
+func removeEndOfLine(secret string) string {
+	re := regexp.MustCompile(`\r?\n`)
+	secret = re.ReplaceAllString(secret, "")
+	return secret
 }
 
 func (gsp *Gossiper) endOfKeyExchange(cs *encConversation.ConversationState, msg *message.RumorMessage) {
