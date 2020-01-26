@@ -7,7 +7,7 @@ import (
 
 const maxBufferSize  = 100
 
-func (gsp *Gossiper) CreateConversationState() (cs *encConversation.ConversationState){
+func (gsp *Gossiper) createConversationState() (cs *encConversation.ConversationState){
 	c := &otr3.Conversation{}
 	priv := gsp.loadPrivateKey()
 	c.SetOurKeys([]otr3.PrivateKey{priv})
@@ -28,7 +28,7 @@ func (gsp *Gossiper) CreateConversationState() (cs *encConversation.Conversation
 func (gsp *Gossiper) createOrLoadConversationState(dest string) (*encConversation.ConversationState,bool) {
 	cs, ok := gsp.convStateMap.Load(dest)
 	if !ok {
-		cs = gsp.CreateConversationState()
+		cs = gsp.createConversationState()
 		gsp.convStateMap.Update(dest, cs)
 	}
 	return cs,ok

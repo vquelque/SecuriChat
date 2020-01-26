@@ -14,7 +14,7 @@ import (
 	"github.com/vquelque/SecuriChat/vector"
 )
 
-// Procecces incoming rumor message.
+// Processes incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
 
 	log.Println("rumor received")
@@ -35,7 +35,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 				log.Println("WARNING : Invalid PoW")
 				return
 			}
-		}else {
+		}else{
 			msg.PoW = pow.NewProofOfWork(msg.Encode())
 		}
 
@@ -82,6 +82,11 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 		}
 		//Get conversation
 		cs,_ := gsp.createOrLoadConversationState(msg.Origin)
+		if encryptedMessage.Step == 0 && cs.Step>0{
+			log.Println("Re-Doing key exchange")
+			gsp.convStateMap.Update(msg.Origin,nil)
+			cs,_ =gsp.createOrLoadConversationState(msg.Origin)
+		}
 
 		plaintxt,toSend, err := cs.Conversation.Receive(encryptedMessage.Message)
 		if err != nil{
@@ -128,6 +133,7 @@ func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationStat
 }
 
 func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConversation.ConversationState, dest string) {
+	log.Println("Sending encryptedMessage")
 	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
 	encMsg := &encConversation.EncryptedMessage{
 		Message: toSend,

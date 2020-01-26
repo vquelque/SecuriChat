@@ -26,11 +26,13 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 			if msg.Encrypted{
 				log.Println("Send encr msg")
 				cs,ok := gsp.createOrLoadConversationState(msg.Destination)
-				cs.Buffer<-msg.Text
 				if !ok{
 					log.Println("Creating conversation")
-				gsp.sendEncryptedTextMessage(cs,encConversation.QueryTextMessage,msg.Destination)
+					gsp.sendEncryptedTextMessage(cs,encConversation.QueryTextMessage,msg.Destination)
+				}else {
+					log.Println("convo loaded")
 				}
+				cs.Buffer<-msg.Text
 				return
 			}
 			mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)

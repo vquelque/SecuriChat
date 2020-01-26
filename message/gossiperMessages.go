@@ -83,7 +83,9 @@ func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *encConv
 func (msg *RumorMessage) Encode() []byte {
 	b := utils.EncodeUint64(uint64(msg.ID))
 	b = append(b, []byte(msg.Origin)...)
+	if msg.EncryptedMessage !=nil{
 	b = append(b, msg.EncryptedMessage.Encode()...)
+	}
 	b = append(b, msg.Text...)
 	return b
 }
