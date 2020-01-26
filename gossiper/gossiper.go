@@ -61,7 +61,7 @@ type receivedPackets struct {
 }
 
 // NewGossiper creates and returns a new gossiper running at given address, port with given name.
-func NewGossiper(address string, uiPort int, peersList string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
+func NewGossiper(address string, uiPort int, peersList,name string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
 	peersSocket := socket.NewUDPSocket(address)
 	uiSocket := socket.NewUDPSocket(fmt.Sprintf("127.0.0.1:%d", uiPort))
 
@@ -72,7 +72,9 @@ func NewGossiper(address string, uiPort int, peersList string, simple bool, anti
 	waitingForAck := observer.Init()
 	resetAntiEntropyChan := make(chan (bool))
 	routing := routing.NewRoutingTable()
-	name := encConversation.GetRandomName()
+	if name==""{
+	  name = encConversation.GetRandomName()
+	}
 
 	OTRpriv := &otr3.DSAPrivateKey{}
 	_ = OTRpriv.Generate(rand.Reader)

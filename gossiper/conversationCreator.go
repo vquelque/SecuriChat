@@ -39,6 +39,7 @@ func (gsp *Gossiper) createConversationState(dest string) (cs *encConversation.C
 		Step:         0,
 		Conversation: c,
 		Buffer:       make(chan string, maxBufferSize),
+		AnswerChan:   make(chan string),
 	}
 
 	return cs

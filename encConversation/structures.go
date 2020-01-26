@@ -19,7 +19,6 @@ const (
 	SMP4             = iota
 	SMP5             = iota
 	AuthenticationOK = iota
-
 	QueryTextMessage = "?OTRv3?"
 )
 
@@ -27,6 +26,7 @@ type ConversationState struct {
 	Step         int // step of the Auth. Key. Exchange (AKE)
 	Conversation *otr3.Conversation
 	Buffer       chan string
+	AnswerChan   chan string
 }
 
 type ConvStateMap struct {

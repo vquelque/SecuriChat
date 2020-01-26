@@ -20,8 +20,6 @@ import (
 // Processes incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
 
-	log.Println("rumor received")
-
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
 		gsp.Routing.UpdateRoute(msg, sender) //update routing table
@@ -48,7 +46,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		//if sender is nil then it is a client message
 		if sender != "" {
 			if msg.Origin != gsp.Name {
-				gsp.handleEncryptedMessage(msg)
+				go gsp.handleEncryptedMessage(msg)
 				fmt.Println(msg.PrintRumor(sender))
 				fmt.Println(gsp.Peers.PrintPeers())
 
@@ -121,13 +119,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			log.Println("state is : ", cs.Step)
 			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
 			cs.Step = encryptedMessage.Step + 1
-			reader := bufio.NewReader(os.Stdin)
-			question,_ := cs.Conversation.SMPQuestion()
-			fmt.Printf("Enter the secret for the question %s : \n", question)
-			secret, _ := reader.ReadString('\n')
-			fmt.Printf("Secret is %s",secret)
-			secret = removeEndOfLine(secret)
-			fmt.Print(secret)
+			secret := getSecretFromClient(cs)
 			toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
 			if err != nil {
 				log.Panic(err.Error())
@@ -150,6 +142,24 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	} else {
 		log.Println("rumor message")
 	}
+}
+
+func askForSecret(cs *encConversation.ConversationState) string {
+	reader := bufio.NewReader(os.Stdin)
+	question, _ := cs.Conversation.SMPQuestion()
+	fmt.Printf("Enter the secret for the question %s : \n", question)
+	secret, _ := reader.ReadString('\n')
+	fmt.Printf("Secret is %s", secret)
+	secret = removeEndOfLine(secret)
+	fmt.Print(secret)
+	return secret
+}
+
+func getSecretFromClient(cs *encConversation.ConversationState) string {
+	question, _ := cs.Conversation.SMPQuestion()
+	fmt.Printf("Waiting client answer for the question %s : \n", question)
+	secret := <-cs.AnswerChan
+	return secret
 }
 
 func removeEndOfLine(secret string) string {
