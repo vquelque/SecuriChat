@@ -2,11 +2,10 @@ package encConversation
 
 import (
 	"crypto/rand"
+	"github.com/vquelque/SecuriChat/constant"
 	"log"
 	"math/big"
 	"strings"
-
-	"github.com/vquelque/SecuriChat/constant"
 )
 
 const base62Char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

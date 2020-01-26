@@ -12,7 +12,13 @@ const (
 	DHKey            = iota
 	RevealSig        = iota
 	Sig              = iota
-	AKE_Finished     = iota
+	AkeFinished      = iota
+	SMP1             = iota
+	SMP2             = iota
+	SMP3             = iota
+	SMP4             = iota
+	AuthenticationOK = iota
+
 	QueryTextMessage = "?OTRv3?"
 )
 

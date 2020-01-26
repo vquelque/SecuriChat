@@ -2,11 +2,10 @@ package gossiper
 
 import (
 	"fmt"
-	"github.com/vquelque/SecuriChat/encConversation"
-	"log"
-
 	"github.com/vquelque/SecuriChat/constant"
+	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/message"
+	"log"
 )
 
 // ProcessClientMessage processes client messages
@@ -23,17 +22,31 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 			gsp.processPrivateMessage(m)
 		} else {
 			//rumor message
-			if msg.Encrypted{
-				log.Println("Send encr msg")
-				cs,ok := gsp.createOrLoadConversationState(msg.Destination)
-				if !ok{
-					log.Println("Creating conversation")
-					gsp.sendEncryptedTextMessage(cs,encConversation.QueryTextMessage,msg.Destination)
-				}else {
-					log.Println("convo loaded")
+			if msg.Encrypted {
+				if msg.AuthAnswer == "" {
+					log.Println("Send encr msg")
+					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
+					if !ok {
+						log.Println("Creating conversation")
+						gsp.sendEncryptedTextMessage(cs, encConversation.QueryTextMessage, msg.Destination)
+					} else {
+						log.Println("convo loaded")
+					}
+					cs.Buffer <- msg.Text
+					return
+				} else if msg.AuthQuestion != "" {
+					log.Println("Requested authentication with question ", msg.AuthQuestion)
+					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
+					if !ok {
+						log.Panic("convo didn't exist")
+					}
+					toSend, err := cs.Conversation.StartAuthenticate(msg.AuthQuestion, []byte(msg.AuthAnswer))
+					if err != nil {
+						log.Panic(err.Error())
+					}
+					gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
 				}
-				cs.Buffer<-msg.Text
-				return
+
 			}
 			mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
 			m := message.NewRumorMessage(gsp.Name, mID, msg.Text)
@@ -41,5 +54,3 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 		}
 	}
 }
-
-
