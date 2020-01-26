@@ -57,7 +57,7 @@ type receivedPackets struct {
 }
 
 // NewGossiper creates and returns a new gossiper running at given address, port with given name.
-func NewGossiper(address string, name string, uiPort int, peersList string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
+func NewGossiper(address string, uiPort int, peersList string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
 	peersSocket := socket.NewUDPSocket(address)
 	uiSocket := socket.NewUDPSocket(fmt.Sprintf("127.0.0.1:%d", uiPort))
 
@@ -68,6 +68,7 @@ func NewGossiper(address string, name string, uiPort int, peersList string, simp
 	waitingForAck := observer.Init()
 	resetAntiEntropyChan := make(chan (bool))
 	routing := routing.NewRoutingTable()
+	name := encConversation.GetRandomName()
 
 	priv := &otr3.DSAPrivateKey{}
 	_ = priv.Generate(rand.Reader)
@@ -191,7 +192,7 @@ func (gsp *Gossiper) processMessages(peerMsgs <-chan *receivedPackets, clientMsg
 				go gsp.processSimpleMessage(gp.Simple)
 			case gp.RumorMessage != nil:
 				// received a rumorMessage
-				 gsp.processRumorMessage(gp.RumorMessage, peerMsg.sender)
+				gsp.processRumorMessage(gp.RumorMessage, peerMsg.sender)
 			case gp.StatusPacket != nil:
 				go gsp.processStatusPacket(gp.StatusPacket, peerMsg.sender)
 			case gp.Private != nil:
@@ -229,6 +230,5 @@ func (gsp *Gossiper) Start() {
 	if gsp.Rtimer > 0 {
 		gsp.startRoutingMessageHandler()
 	}
+	fmt.Printf("Gossiper running at address %s, unique peer id : %s \n", gsp.PeersSocket.Address(), gsp.Name)
 }
-
-

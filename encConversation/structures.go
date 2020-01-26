@@ -6,39 +6,33 @@ import (
 	"sync"
 )
 
-const(
-	QueryMsg = iota
-	DHCommit = iota
-	DHKey = iota
-	RevealSig = iota
-	Sig = iota
-	AKE_Finished = iota
-    QueryTextMessage = "?OTRv3?"
+const (
+	QueryMsg         = iota
+	DHCommit         = iota
+	DHKey            = iota
+	RevealSig        = iota
+	Sig              = iota
+	AKE_Finished     = iota
+	QueryTextMessage = "?OTRv3?"
 )
-
 
 type EncryptedMessage struct {
 	Message otr3.ValidMessage
-	Step int
-	Dest string
+	Step    int
+	Dest    string
 }
 
-func (enc *EncryptedMessage) Encode() []byte{
+func (enc *EncryptedMessage) Encode() []byte {
 	b := utils.EncodeUint64(uint64(enc.Step))
 	b = append(b, []byte(enc.Dest)...)
 	b = append(b, enc.Message...)
 	return b
 }
 
-
-
-
-
-
 type ConversationState struct {
-	Step int // step of the Auth. Key. Exchange (AKE)
+	Step         int // step of the Auth. Key. Exchange (AKE)
 	Conversation *otr3.Conversation
-	Buffer chan string
+	Buffer       chan string
 }
 
 type ConvStateMap struct {
