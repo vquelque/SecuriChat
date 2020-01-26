@@ -18,11 +18,12 @@ type SimpleMessage struct {
 
 //RumorMessage represents a type of SecuriChat message to be gossiped.
 type RumorMessage struct {
-	Origin           string
-	ID               uint32
-	Text             string
-	PoW              pow.ProofOfWork
-	EncryptedMessage *EncryptedMessage
+	Origin              string
+	ID                  uint32
+	Text                string
+	PoW                 pow.ProofOfWork
+	EncryptedMessage    *EncryptedMessage
+	RSAEncryptedMessage *RSAEncryptedMessage
 }
 
 //PrivateMessage between 2 peers
