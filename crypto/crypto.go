@@ -1,7 +1,6 @@
 package crypto
 
 import (
-	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -42,10 +41,10 @@ func RSADecrypt(cypher message.RSAEncryptedMessage, privateKey *rsa.PrivateKey) 
 	return data
 }
 
-func GenerateRSAKeypair() (priv crypto.PrivateKey, pub crypto.PublicKey) {
+func GenerateRSAKeypair() (priv *rsa.PrivateKey, pub *rsa.PublicKey) {
 	private, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		log.Fatal("Error generating the RSA keypair")
 	}
-	return private, private.Public()
+	return private, &private.PublicKey
 }

@@ -2,8 +2,10 @@ package gossiper
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
 	"github.com/coyim/otr3"
+	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"log"
 	"sync"
@@ -37,7 +39,9 @@ type Gossiper struct {
 	Routing               *routing.Routing
 	Rtimer                int
 	convStateMap          *encConversation.ConvStateMap
-	privateKey            *otr3.DSAPrivateKey
+	OTRprivateKey         *otr3.DSAPrivateKey
+	RSAPrivateKey         *rsa.PrivateKey
+	RSAPublickKey         *rsa.PublicKey
 }
 
 // GossipPacket is the only type of packet sent to other peers.
@@ -70,8 +74,10 @@ func NewGossiper(address string, uiPort int, peersList string, simple bool, anti
 	routing := routing.NewRoutingTable()
 	name := encConversation.GetRandomName()
 
-	priv := &otr3.DSAPrivateKey{}
-	_ = priv.Generate(rand.Reader)
+	OTRpriv := &otr3.DSAPrivateKey{}
+	_ = OTRpriv.Generate(rand.Reader)
+	RSAPriv, RSAPub := crypto.GenerateRSAKeypair()
+
 	return &Gossiper{
 		Name:                  name,
 		Peers:                 peersSet,
@@ -88,7 +94,9 @@ func NewGossiper(address string, uiPort int, peersList string, simple bool, anti
 		Routing:               routing,
 		Rtimer:                rtimer,
 		convStateMap:          encConversation.InitConvStateMap(),
-		privateKey:            priv,
+		OTRprivateKey:         OTRpriv,
+		RSAPrivateKey:         RSAPriv,
+		RSAPublickKey:         RSAPub,
 	}
 }
 

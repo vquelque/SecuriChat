@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-const maxBufferSize  = 100
+const maxBufferSize = 100
 
 
 
@@ -38,22 +38,21 @@ func (gsp *Gossiper) createConversationState(dest string) (cs *encConversation.C
 	cs =  &encConversation.ConversationState{
 		Step:         0,
 		Conversation: c,
-		Buffer: make(chan string,maxBufferSize),
+		Buffer:       make(chan string, maxBufferSize),
 	}
-
 
 	return cs
 }
 
-func (gsp *Gossiper) createOrLoadConversationState(dest string) (*encConversation.ConversationState,bool) {
+func (gsp *Gossiper) createOrLoadConversationState(dest string) (*encConversation.ConversationState, bool) {
 	cs, ok := gsp.convStateMap.Load(dest)
 	if !ok {
 		cs = gsp.createConversationState(dest)
 		gsp.convStateMap.Update(dest, cs)
 	}
-	return cs,ok
+	return cs, ok
 }
 
 func (gsp *Gossiper) loadPrivateKey() *otr3.DSAPrivateKey {
-	return gsp.privateKey
+	return gsp.OTRprivateKey
 }
