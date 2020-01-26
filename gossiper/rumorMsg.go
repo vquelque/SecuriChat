@@ -1,12 +1,14 @@
 package gossiper
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/coyim/otr3"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/vquelque/SecuriChat/constant"
@@ -91,6 +93,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			log.Fatal(err.Error())
 		}
 
+
 		switch encryptedMessage.Step {
 		case encConversation.QueryMsg, encConversation.DHCommit,
 			encConversation.DHKey, encConversation.RevealSig:
@@ -101,18 +104,10 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
 			if cs.Step == encConversation.Sig {
-				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
-				go gsp.sendBufferedEncrRumors(cs, msg)
-
+				gsp.endOfKeyExchange(cs, msg)
 			}
 		case encConversation.Sig:
-			log.Println("Key exchange is finished")
-			go gsp.sendBufferedEncrRumors(cs, msg)
-			cs.Step = encConversation.AkeFinished
+			gsp.endOfKeyExchange(cs, msg)
 		case encConversation.AkeFinished, encConversation.AuthenticationOK:
 			// A message was received
 			msgType := " AUTHENTICATED "
@@ -121,27 +116,43 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			}
 			fmt.Printf("RECEIVED %s ENCR MESSAGE : \n %s \n ", msgType, plaintxt)
 
-		case encConversation.SMP1, encConversation.SMP2, encConversation.SMP3, encConversation.SMP4:
+		case encConversation.SMP1:
+			log.Println("state is : ", cs.Step)
+			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
+			cs.Step = encryptedMessage.Step + 1
+			reader := bufio.NewReader(os.Stdin)
+			question,_ := cs.Conversation.SMPQuestion()
+			fmt.Printf("Enter the secret for the question %s : \n", question)
+			secret, _ := reader.ReadString('\n')
+			fmt.Printf("Secret is %s",secret)
+			toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
+			if err != nil {
+				log.Panic(err.Error())
+			}
+			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
+
+		case encConversation.SMP2, encConversation.SMP3:
+
 			log.Println("state is : ", cs.Step)
 			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
 			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
-			if cs.Step == encConversation.Sig {
-				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
-				go gsp.sendBufferedEncrRumors(cs, msg)
-
-			}
+		case encConversation.SMP4, encConversation.SMP5:
+			log.Println("Should be ok")
+			cs.Step = encConversation.AuthenticationOK
 
 		}
 	} else {
 		log.Println("rumor message")
 	}
+}
+
+func (gsp *Gossiper) endOfKeyExchange(cs *encConversation.ConversationState, msg *message.RumorMessage) {
+	log.Println("Key exchange is finished")
+	go gsp.sendBufferedEncrRumors(cs, msg)
+	cs.Step = encConversation.AkeFinished
 }
 
 func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationState, msg *message.RumorMessage) {

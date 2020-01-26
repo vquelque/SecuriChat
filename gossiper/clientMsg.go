@@ -36,6 +36,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					return
 				} else if msg.AuthQuestion != "" {
 					log.Println("Requested authentication with question ", msg.AuthQuestion)
+					log.Println("Requested authentication with expected answer ", msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
 						log.Panic("convo didn't exist")
@@ -44,6 +45,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					if err != nil {
 						log.Panic(err.Error())
 					}
+					cs.Step = encConversation.SMP1
 					gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
 				}
 

@@ -17,6 +17,7 @@ const (
 	SMP2             = iota
 	SMP3             = iota
 	SMP4             = iota
+	SMP5             = iota
 	AuthenticationOK = iota
 
 	QueryTextMessage = "?OTRv3?"
@@ -53,3 +54,9 @@ func (convMap *ConvStateMap) Load(k string) (v *ConversationState, ok bool) {
 	convMap.Lock.RUnlock()
 	return v, ok
 }
+
+func (convMap *ConvStateMap) DestroyConversation(dest string) {
+	convMap.Update(dest,nil)
+}
+
+
