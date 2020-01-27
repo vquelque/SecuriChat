@@ -1,6 +1,7 @@
 package peers
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -9,6 +10,11 @@ import (
 
 type Peers struct {
 	peers map[string]bool
+	lock  sync.RWMutex
+}
+
+type RSAPeers struct {
+	peers map[string]*rsa.PublicKey
 	lock  sync.RWMutex
 }
 
@@ -24,6 +30,11 @@ func NewPeersSet(peersStr string) *Peers {
 		}
 	}
 	return peersSet
+}
+
+func NewRSAPeersSet() *RSAPeers {
+	RSApeersSet := &RSAPeers{peers: make(map[string]*rsa.PublicKey)}
+	return RSApeersSet
 }
 
 func (peersSet *Peers) Add(peer string) {
@@ -105,4 +116,36 @@ func (peerSet *Peers) getAllPeers() []string {
 func (peerSet *Peers) size() int {
 	size := len(peerSet.peers)
 	return size
+}
+
+func (peersSet *RSAPeers) Add(peerID string, peerPublicKey *rsa.PublicKey) {
+	peersSet.lock.Lock()
+	defer peersSet.lock.Unlock()
+	_, ok := peersSet.peers[peerID]
+	if !ok {
+		peersSet.peers[peerID] = peerPublicKey
+	}
+}
+
+func (peersSet *RSAPeers) Delete(peerID string) {
+	peersSet.lock.Lock()
+	defer peersSet.lock.Unlock()
+	delete(peersSet.peers, peerID)
+}
+
+func (peersSet *RSAPeers) GetPeerPublicKey(peerID string) *rsa.PublicKey {
+	peersSet.lock.RLock()
+	defer peersSet.lock.RUnlock()
+	key, ok := peersSet.peers[peerID]
+	if !ok {
+		return nil
+	}
+	return key
+}
+
+func (peersSet *RSAPeers) Contains(peerID string) bool {
+	peersSet.lock.RLock()
+	defer peersSet.lock.RUnlock()
+	_, ok := peersSet.peers[peerID]
+	return ok
 }

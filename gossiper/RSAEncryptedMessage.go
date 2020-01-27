@@ -9,7 +9,7 @@ import (
 )
 
 func (gsp *Gossiper) handleRSAEncryptedMessage(rumor *message.RumorMessage) {
-	if !gsp.SubscribedPeers.Contains(rumor.Origin) {
+	if !gsp.RSAPeers.Contains(rumor.Origin) {
 		return
 	}
 	plain, err := crypto.RSADecrypt(rumor.RSAEncryptedMessage, gsp.RSAPrivateKey)

@@ -42,7 +42,7 @@ type Gossiper struct {
 	OTRprivateKey         *otr3.DSAPrivateKey
 	RSAPrivateKey         *rsa.PrivateKey
 	RSAPublickKey         *rsa.PublicKey
-	SubscribedPeers       *peers.Peers //Check if they have an encrypted message for us
+	RSAPeers              *peers.RSAPeers //Check if they have an encrypted message for us
 }
 
 // GossipPacket is the only type of packet sent to other peers.
@@ -62,7 +62,7 @@ type receivedPackets struct {
 }
 
 // NewGossiper creates and returns a new gossiper running at given address, port with given name.
-func NewGossiper(address string, uiPort int, peersList,name string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
+func NewGossiper(address string, uiPort int, peersList, name string, simple bool, antiEntropyTimer int, rtimer int) *Gossiper {
 	peersSocket := socket.NewUDPSocket(address)
 	uiSocket := socket.NewUDPSocket(fmt.Sprintf("127.0.0.1:%d", uiPort))
 
@@ -73,14 +73,14 @@ func NewGossiper(address string, uiPort int, peersList,name string, simple bool,
 	waitingForAck := observer.Init()
 	resetAntiEntropyChan := make(chan (bool))
 	routing := routing.NewRoutingTable()
-	if name==""{
-	  name = encConversation.GetRandomName()
+	if name == "" {
+		name = encConversation.GetRandomName()
 	}
 
 	OTRpriv := &otr3.DSAPrivateKey{}
 	_ = OTRpriv.Generate(rand.Reader)
 	RSAPriv, RSAPub := crypto.GenerateRSAKeypair()
-	subscribedPeers := peers.NewPeersSet("")
+	RSAPeers := peers.NewRSAPeersSet()
 
 	return &Gossiper{
 		Name:                  name,
@@ -101,7 +101,7 @@ func NewGossiper(address string, uiPort int, peersList,name string, simple bool,
 		OTRprivateKey:         OTRpriv,
 		RSAPrivateKey:         RSAPriv,
 		RSAPublickKey:         RSAPub,
-		SubscribedPeers:       subscribedPeers,
+		RSAPeers:              RSAPeers,
 	}
 }
 
