@@ -1,8 +1,11 @@
 package gossiper
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"github.com/coyim/otr3"
+	"github.com/dedis/protobuf"
+	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
 	"log"
@@ -161,6 +164,17 @@ func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConve
 		Dest:    dest,
 	}
 	rumor := message.NewRumorMessageWithEncryptedData(gsp.Name, mID, encMsg)
+	gsp.processRumorMessage(rumor, "")
+}
+
+func (gsp *Gossiper) sendRSAKeyExchangeMessage(encryptedRumor *message.EncryptedMessage, peerPublicKey *rsa.PublicKey) {
+	enc, err := protobuf.Encode(encryptedRumor)
+	if err != nil {
+		log.Printf("Error encrypting OTR derivation message with RSA")
+	}
+	encr := crypto.RSAEncrypt(enc, peerPublicKey)
+	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
+	rumor := message.NewRSARumorMessage(gsp.Name, mID, encr)
 	gsp.processRumorMessage(rumor, "")
 }
 

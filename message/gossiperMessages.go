@@ -86,6 +86,14 @@ func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *Encrypt
 	}
 }
 
+func NewRSARumorMessage(origin string, ID uint32, message RSAEncryptedMessage) *RumorMessage {
+	return &RumorMessage{
+		Origin:              origin,
+		ID:                  ID,
+		RSAEncryptedMessage: message,
+	}
+}
+
 func (msg *RumorMessage) Encode() []byte {
 	b := utils.EncodeUint64(uint64(msg.ID))
 	b = append(b, []byte(msg.Origin)...)
