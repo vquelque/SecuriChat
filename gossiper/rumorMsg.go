@@ -103,7 +103,14 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			log.Printf("Doing key exchange, step %d \n", encryptedMessage.Step+1)
 			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
-			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
+			if toSend != nil {
+				encMsg := &message.EncryptedMessage{
+					Message: toSend[0],
+					Step:    cs.Step,
+					Dest:    "",
+				}
+				gsp.sendRSAKeyExchangeMessage(encMsg, cs.PublicKeyOfPeer)
+			}
 
 			if cs.Step == encConversation.Sig {
 				cs.Step = encConversation.AkeFinished
