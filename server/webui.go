@@ -39,7 +39,7 @@ func peersListHandler(gsp *gossiper.Gossiper) http.HandlerFunc {
 			if peerAddrChecked == nil {
 				return
 			}
-			if !gsp.Peers.CheckPeerPresent(peerAddr) {
+			if !gsp.Peers.Contains(peerAddr) {
 				gsp.Peers.Add(peerAddr)
 			} else {
 				gsp.Peers.Delete(peerAddr)
