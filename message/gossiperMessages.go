@@ -23,7 +23,7 @@ type RumorMessage struct {
 	Text                string
 	PoW                 pow.ProofOfWork
 	EncryptedMessage    *EncryptedMessage
-	RSAEncryptedMessage *RSAEncryptedMessage
+	RSAEncryptedMessage RSAEncryptedMessage
 }
 
 //PrivateMessage between 2 peers

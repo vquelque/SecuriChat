@@ -25,7 +25,7 @@ func RSAEncrypt(data []byte, destPublicKey *rsa.PublicKey) message.RSAEncryptedM
 	return encryptedMessage
 }
 
-func RSADecrypt(cypher message.RSAEncryptedMessage, privateKey *rsa.PrivateKey) []byte {
+func RSADecrypt(cypher message.RSAEncryptedMessage, privateKey *rsa.PrivateKey) ([]byte, error) {
 	hash := sha256.New()
 	label := []byte("")
 	data, err := rsa.DecryptOAEP(
@@ -35,10 +35,7 @@ func RSADecrypt(cypher message.RSAEncryptedMessage, privateKey *rsa.PrivateKey) 
 		cypher,
 		label,
 	)
-	if err != nil {
-		log.Fatal("Error decrypting the RSA cyphertext")
-	}
-	return data
+	return data, err
 }
 
 func GenerateRSAKeypair() (priv *rsa.PrivateKey, pub *rsa.PublicKey) {

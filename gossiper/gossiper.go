@@ -42,6 +42,7 @@ type Gossiper struct {
 	OTRprivateKey         *otr3.DSAPrivateKey
 	RSAPrivateKey         *rsa.PrivateKey
 	RSAPublickKey         *rsa.PublicKey
+	SubscribedPeers       *peers.Peers //Check if they have an encrypted message for us
 }
 
 // GossipPacket is the only type of packet sent to other peers.
@@ -77,6 +78,7 @@ func NewGossiper(address string, uiPort int, peersList string, simple bool, anti
 	OTRpriv := &otr3.DSAPrivateKey{}
 	_ = OTRpriv.Generate(rand.Reader)
 	RSAPriv, RSAPub := crypto.GenerateRSAKeypair()
+	subscribedPeers := peers.NewPeersSet("")
 
 	return &Gossiper{
 		Name:                  name,
@@ -97,6 +99,7 @@ func NewGossiper(address string, uiPort int, peersList string, simple bool, anti
 		OTRprivateKey:         OTRpriv,
 		RSAPrivateKey:         RSAPriv,
 		RSAPublickKey:         RSAPub,
+		SubscribedPeers:       subscribedPeers,
 	}
 }
 

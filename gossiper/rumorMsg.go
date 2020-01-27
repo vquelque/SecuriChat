@@ -48,7 +48,9 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 				gsp.handleEncryptedMessage(msg)
 				fmt.Println(msg.PrintRumor(sender))
 				fmt.Println(gsp.Peers.PrintPeers())
-
+				if msg.RSAEncryptedMessage != nil {
+					gsp.handleRSAEncryptedMessage(msg)
+				}
 			}
 		}
 		//TODO CLEANLY STORE IN UIStorage

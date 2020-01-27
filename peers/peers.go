@@ -41,7 +41,7 @@ func (peersSet *Peers) Delete(peer string) {
 	delete(peersSet.peers, peer)
 }
 
-func (peersSet *Peers) CheckPeerPresent(peer string) bool {
+func (peersSet *Peers) Contains(peer string) bool {
 	peersSet.lock.RLock()
 	defer peersSet.lock.RUnlock()
 	_, ok := peersSet.peers[peer]
