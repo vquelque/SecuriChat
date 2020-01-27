@@ -1,12 +1,15 @@
 package gossiper
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/coyim/otr3"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
 	"log"
 	"math/rand"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/vquelque/SecuriChat/constant"
@@ -16,8 +19,6 @@ import (
 
 // Processes incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
-
-	log.Println("rumor received")
 
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
@@ -45,7 +46,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		//if sender is nil then it is a client message
 		if sender != "" {
 			if msg.Origin != gsp.Name {
-				gsp.handleEncryptedMessage(msg)
+				go gsp.handleEncryptedMessage(msg)
 				fmt.Println(msg.PrintRumor(sender))
 				fmt.Println(gsp.Peers.PrintPeers())
 				if msg.RSAEncryptedMessage != nil {
@@ -93,6 +94,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			log.Fatal(err.Error())
 		}
 
+
 		switch encryptedMessage.Step {
 		case encConversation.QueryMsg, encConversation.DHCommit,
 			encConversation.DHKey, encConversation.RevealSig:
@@ -103,18 +105,10 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
 			if cs.Step == encConversation.Sig {
-				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
-				go gsp.sendBufferedEncrRumors(cs, msg)
-
+				gsp.endOfKeyExchange(cs, msg)
 			}
 		case encConversation.Sig:
-			log.Println("Key exchange is finished")
-			go gsp.sendBufferedEncrRumors(cs, msg)
-			cs.Step = encConversation.AkeFinished
+			gsp.endOfKeyExchange(cs, msg)
 		case encConversation.AkeFinished, encConversation.AuthenticationOK:
 			// A message was received
 			msgType := " AUTHENTICATED "
@@ -123,27 +117,63 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			}
 			fmt.Printf("RECEIVED %s ENCR MESSAGE : \n %s \n ", msgType, plaintxt)
 
-		case encConversation.SMP1, encConversation.SMP2, encConversation.SMP3, encConversation.SMP4:
+		case encConversation.SMP1:
+			log.Println("state is : ", cs.Step)
+			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
+			cs.Step = encryptedMessage.Step + 1
+			secret := getSecretFromClient(cs)
+			toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
+			if err != nil {
+				log.Panic(err.Error())
+			}
+			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
+
+		case encConversation.SMP2, encConversation.SMP3:
+
 			log.Println("state is : ", cs.Step)
 			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
 			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
-			if cs.Step == encConversation.Sig {
-				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
-				go gsp.sendBufferedEncrRumors(cs, msg)
-
-			}
+		case encConversation.SMP4, encConversation.SMP5:
+			log.Println("Should be ok")
+			cs.Step = encConversation.AuthenticationOK
 
 		}
 	} else {
 		log.Println("rumor message")
 	}
+}
+
+func askForSecret(cs *encConversation.ConversationState) string {
+	reader := bufio.NewReader(os.Stdin)
+	question, _ := cs.Conversation.SMPQuestion()
+	fmt.Printf("Enter the secret for the question %s : \n", question)
+	secret, _ := reader.ReadString('\n')
+	fmt.Printf("Secret is %s", secret)
+	secret = removeEndOfLine(secret)
+	fmt.Print(secret)
+	return secret
+}
+
+func getSecretFromClient(cs *encConversation.ConversationState) string {
+	question, _ := cs.Conversation.SMPQuestion()
+	fmt.Printf("Waiting client answer for the question %s : \n", question)
+	secret := <-cs.AnswerChan
+	return secret
+}
+
+func removeEndOfLine(secret string) string {
+	re := regexp.MustCompile(`\r?\n`)
+	secret = re.ReplaceAllString(secret, "")
+	return secret
+}
+
+func (gsp *Gossiper) endOfKeyExchange(cs *encConversation.ConversationState, msg *message.RumorMessage) {
+	log.Println("Key exchange is finished")
+	go gsp.sendBufferedEncrRumors(cs, msg)
+	cs.Step = encConversation.AkeFinished
 }
 
 func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationState, msg *message.RumorMessage) {

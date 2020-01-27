@@ -17,8 +17,8 @@ const (
 	SMP2             = iota
 	SMP3             = iota
 	SMP4             = iota
+	SMP5             = iota
 	AuthenticationOK = iota
-
 	QueryTextMessage = "?OTRv3?"
 )
 
@@ -26,6 +26,7 @@ type ConversationState struct {
 	Step         int // step of the Auth. Key. Exchange (AKE)
 	Conversation *otr3.Conversation
 	Buffer       chan string
+	AnswerChan   chan string
 }
 
 type ConvStateMap struct {
@@ -53,3 +54,9 @@ func (convMap *ConvStateMap) Load(k string) (v *ConversationState, ok bool) {
 	convMap.Lock.RUnlock()
 	return v, ok
 }
+
+func (convMap *ConvStateMap) DestroyConversation(dest string) {
+	convMap.Update(dest,nil)
+}
+
+

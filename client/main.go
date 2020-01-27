@@ -30,14 +30,10 @@ func main() {
 	}
 
 	msg := &message.Message{}
-	if *text != "" {
 		if *destination != "" {
 			msg.Destination = *destination
 		}
 		msg.Text = *text
-	} else {
-		log.Fatal("ERROR (Bad argument combination)")
-	}
 	msg.Encrypted = *encrypted
 	msg.AuthAnswer = *authAnswer
 	msg.AuthQuestion = *authQuestion
