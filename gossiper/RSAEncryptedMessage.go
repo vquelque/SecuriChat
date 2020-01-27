@@ -9,9 +9,9 @@ import (
 )
 
 func (gsp *Gossiper) handleRSAEncryptedMessage(rumor *message.RumorMessage) {
-	if !gsp.SubscribedPeers.Contains(rumor.Origin) {
-		return
-	}
+	//if !gsp.SubscribedPeers.Contains(rumor.Origin) {
+	//	return
+	//}
 	plain, err := crypto.RSADecrypt(rumor.RSAEncryptedMessage, gsp.RSAPrivateKey)
 	if err != nil {
 		log.Printf("Received encryted rumor but is not for us. \n")

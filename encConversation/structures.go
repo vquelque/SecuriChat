@@ -1,6 +1,7 @@
 package encConversation
 
 import (
+	"crypto/rsa"
 	"sync"
 
 	"github.com/coyim/otr3"
@@ -23,10 +24,11 @@ const (
 )
 
 type ConversationState struct {
-	Step         int // step of the Auth. Key. Exchange (AKE)
-	Conversation *otr3.Conversation
-	Buffer       chan string
-	AnswerChan   chan string
+	Step            int // step of the Auth. Key. Exchange (AKE)
+	Conversation    *otr3.Conversation
+	Buffer          chan string
+	AnswerChan      chan string
+	PublicKeyOfPeer *rsa.PublicKey
 }
 
 type ConvStateMap struct {
@@ -56,7 +58,5 @@ func (convMap *ConvStateMap) Load(k string) (v *ConversationState, ok bool) {
 }
 
 func (convMap *ConvStateMap) DestroyConversation(dest string) {
-	convMap.Update(dest,nil)
+	convMap.Update(dest, nil)
 }
-
-

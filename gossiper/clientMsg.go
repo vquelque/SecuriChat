@@ -6,6 +6,7 @@ import (
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/message"
 	"log"
+	"strings"
 )
 
 // ProcessClientMessage processes client messages
@@ -25,7 +26,10 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 			if msg.Encrypted {
 				if msg.AuthAnswer == "" {
 					log.Println("Send encr msg")
-					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
+					dest := strings.Split(msg.Destination, ",")
+					destName := dest[0]
+					//destPubKey := dest[1]
+					cs, ok := gsp.createOrLoadConversationState(destName)
 					if !ok {
 						log.Println("Creating conversation")
 						gsp.sendEncryptedTextMessage(cs, encConversation.QueryTextMessage, msg.Destination)
@@ -35,7 +39,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					cs.Buffer <- msg.Text
 					return
 				} else if msg.AuthQuestion != "" {
-					log.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion,msg.AuthAnswer)
+					log.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion, msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
 						log.Panic("convo didn't exist")
@@ -46,13 +50,13 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					}
 					cs.Step = encConversation.SMP1
 					gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
-				}else {
-					log.Printf("Requested authentication with answer %s",msg.AuthAnswer)
+				} else {
+					log.Printf("Requested authentication with answer %s", msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
 						log.Panic("convo didn't exist")
 					}
-					go func() {cs.AnswerChan <- msg.AuthAnswer}()
+					go func() { cs.AnswerChan <- msg.AuthAnswer }()
 				}
 
 			}

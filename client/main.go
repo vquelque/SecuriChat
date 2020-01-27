@@ -14,7 +14,8 @@ func main() {
 
 	uiPort := flag.Int("UIPort", 8080, "Port for the UI client (default 8080)")
 	text := flag.String("msg", "", "message to be sent; if the -dest flag is present, this is a private message, otherwise it’s a rumor message")
-	destination := flag.String("dest", "", "destination for the private message. can be omitted")
+	destinationName := flag.String("destName", "", "destinationName for the private message. can be omitted")
+	destinationPubKey := flag.String("destPubKey", "", "destination public key")
 	encrypted := flag.Bool("encrypted", false, "encrypted message")
 	authAnswer := flag.String("authAnswer", "", "use this flag to the answer to the question")
 	authQuestion := flag.String("authQuestion", "", "use this flag to indicate that you want to authenticate by providing this question ")
@@ -30,10 +31,10 @@ func main() {
 	}
 
 	msg := &message.Message{}
-		if *destination != "" {
-			msg.Destination = *destination
-		}
-		msg.Text = *text
+	if *destinationName != "" && *destinationPubKey != "" {
+		msg.Destination = *destinationName + "," + *destinationPubKey
+	}
+	msg.Text = *text
 	msg.Encrypted = *encrypted
 	msg.AuthAnswer = *authAnswer
 	msg.AuthQuestion = *authQuestion
