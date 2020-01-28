@@ -4,6 +4,7 @@ package message
 type Message struct {
 	Text         string
 	Origin       string //for UI
+	Room         string //for UI
 	Encrypted    bool
 	Destination  string
 	File         string

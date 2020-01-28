@@ -4,13 +4,15 @@ import { connect, sendMsg, init } from "./api";
 import Header from "./components/header/Header";
 import ChatBox from "./components/chatBox/ChatBox";
 import Input from "./components/input/input";
+import ChatList from "./components/chatList/chatList";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       messages: [],
-      peerId: ""
+      peerId: "",
+      roomList: ["a", "b", "c"]
     };
   }
 
@@ -22,11 +24,13 @@ class App extends Component {
       }));
     });
 
-    connect((origin, text) => {
+    connect((origin, text, room) => {
       var msg = {
         origin: origin,
-        text: text
+        text: text,
+        room: room
       };
+
       this.setState(prevState => ({
         messages: [...this.state.messages, msg]
       }));
@@ -35,10 +39,17 @@ class App extends Component {
 
   send = text => {
     var message = JSON.stringify({
-      destination: "",
+      room: this.state.currentRoom,
+      destination: this.state.currentRoom,
       text: text
     });
     sendMsg(message);
+  };
+
+  joinChat = room => {
+    this.setState(prevState => ({
+      currentRoom: room
+    }));
   };
 
   render() {
@@ -49,10 +60,19 @@ class App extends Component {
             <span className="username">{this.state.peerId}</span>
             <span className="user-id">{this.state.PubRSAKey}</span>
           </div>
+          <ChatList
+            rooms={this.state.roomList}
+            currentRoom={this.state.currentRoom}
+            connectToRoom={this.joinChat}
+          />
         </aside>
         <section className="chat-screen">
-          <Header className="chat-header" peerId={this.state.peerId} />
-          <ChatBox messages={this.state.messages} id={this.state.peerId} />
+          <Header className="chat-header" peerID={this.state.currentRoom} />
+          <ChatBox
+            messages={this.state.messages}
+            id={this.state.peerId}
+            currentRoom={this.state.currentRoom}
+          />
           <footer className="chat-footer">
             <Input send={this.send} />
           </footer>

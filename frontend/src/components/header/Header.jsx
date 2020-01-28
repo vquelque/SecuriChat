@@ -4,11 +4,13 @@ import "./Header.scss";
 
 class Header extends Component {
   render() {
-    const { peerId } = this.props;
+    const { peerID } = this.props;
     return (
       <div className="header">
         <h2>SecuriChat - Try it, use it.</h2>
-        <h3>Peer Id : {peerId} </h3>
+        <h3>
+          Chatting with <strong style={{ color: "red" }}>{peerID}</strong>
+        </h3>
       </div>
     );
   }

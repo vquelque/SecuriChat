@@ -9,9 +9,11 @@ let connect = callback => {
 
   socket.onmessage = msg => {
     var json = JSON.parse(msg.data);
+    console.log(json);
     var origin = json.Origin;
     var message = json.Text;
-    callback(origin, message);
+    var room = json.Room;
+    callback(origin, message, room);
   };
 
   socket.onclose = event => {

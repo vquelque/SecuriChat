@@ -3,16 +3,17 @@ import "./ChatBox.scss";
 
 class ChatBox extends Component {
   render() {
-    const { messages } = this.props;
+    const { messages, currentRoom } = this.props;
+    const roomMsg = messages.filter(m => m.room === currentRoom);
     return (
       <ul className="Messages-list">
-        {messages.map(msg => this.renderMessage(msg))}
+        {roomMsg.map(msg => this.renderMessage(msg))}
       </ul>
     );
   }
 
   renderMessage(message) {
-    const { origin, text } = message;
+    const { origin, text, room } = message;
     const { id } = this.props;
     const messageFromMe = id === origin;
     const cssClass = messageFromMe
