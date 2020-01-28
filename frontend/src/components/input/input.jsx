@@ -9,7 +9,7 @@ class Input extends Component {
 
   render() {
     return (
-      <div className="Input">
+      <div className="message-form">
         <form onSubmit={e => this.onSubmit(e)}>
           <input
             onChange={e => this.onChange(e)}

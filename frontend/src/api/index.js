@@ -28,4 +28,20 @@ let sendMsg = msg => {
   socket.send(msg);
 };
 
-export { connect, sendMsg };
+let init = init_state => {
+  fetch("http://localhost:8080/init")
+    .then(res => res.json())
+    .then(
+      result => {
+        init_state(result);
+      },
+      // Remarque : il est important de traiter les erreurs ici
+      // au lieu d'utiliser un bloc catch(), pour ne pas passer à la trappe
+      // des exceptions provenant de réels bugs du composant.
+      error => {
+        console.log("error initializing app" + error);
+      }
+    );
+};
+
+export { connect, sendMsg, init };

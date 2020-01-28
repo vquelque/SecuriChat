@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,11 @@ import (
 	"github.com/vquelque/SecuriChat/gossiper"
 	"github.com/vquelque/SecuriChat/message"
 )
+
+type frontendData struct {
+	PeerId    string
+	PubRSAKey string
+}
 
 // Upgrader to upgrade the http connection to a websocket connection
 var upgrader = websocket.Upgrader{
@@ -59,12 +65,35 @@ func serveWs(gsp *gossiper.Gossiper) http.HandlerFunc {
 	})
 }
 
+func initHandler(gsp *gossiper.Gossiper) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		switch r.Method {
+		case "GET":
+			frontendData := &frontendData{
+				PeerId:    gsp.Name,
+				PubRSAKey: "RSA PUB KEY",
+			}
+			frontendDataJSON, err := json.Marshal(frontendData)
+			if err != nil {
+				log.Print("error encoding json frontend data")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(frontendDataJSON)
+		}
+	})
+}
+
 func setupRoutes(gsp *gossiper.Gossiper) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Simple Server")
 	})
 	// mape our `/ws` endpoint to the `serveWs` function
 	http.HandleFunc("/ws", serveWs(gsp))
+	http.HandleFunc("/init", initHandler(gsp))
 }
 
 func StartReactServer(gsp *gossiper.Gossiper) {

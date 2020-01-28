@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { connect, sendMsg } from "./api";
+import { connect, sendMsg, init } from "./api";
 import Header from "./components/header/Header";
 import ChatBox from "./components/chatBox/ChatBox";
 import Input from "./components/input/input";
@@ -10,11 +10,18 @@ class App extends Component {
     super(props);
     this.state = {
       messages: [],
-      id: "wlRvQdUpIJ"
+      peerId: ""
     };
   }
 
   componentDidMount() {
+    init(data => {
+      this.setState(prevstate => ({
+        peerId: data.PeerId,
+        PubRSAKey: data.PubRSAKey
+      }));
+    });
+
     connect((origin, text) => {
       var msg = {
         origin: origin,
@@ -37,9 +44,19 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Header />
-        <ChatBox messages={this.state.messages} id={this.state.id} />
-        <Input send={this.send} />
+        <aside className="sidebar left-sidebar">
+          <div className="user-profile">
+            <span className="username">{this.state.peerId}</span>
+            <span className="user-id">{this.state.PubRSAKey}</span>
+          </div>
+        </aside>
+        <section className="chat-screen">
+          <Header className="chat-header" peerId={this.state.peerId} />
+          <ChatBox messages={this.state.messages} id={this.state.peerId} />
+          <footer className="chat-footer">
+            <Input send={this.send} />
+          </footer>
+        </section>
       </div>
     );
   }
