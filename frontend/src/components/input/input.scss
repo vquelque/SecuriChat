@@ -1,0 +1,25 @@
+form {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  max-width: 900px;
+  margin: 0 auto 40px;
+}
+
+input {
+  padding: 5px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid orangered;
+  flex-grow: 1;
+}
+
+button {
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: orangered;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin-left: 10px;
+}

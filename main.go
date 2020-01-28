@@ -28,12 +28,13 @@ func main() {
 		rtimer = constant.DefaultRTimer
 	}
 
-	gossiper := gossiper.NewGossiper(*addr, *uiPort, *peersList,*name, *simple, antiEntropyTimer, rtimer)
+	gossiper := gossiper.NewGossiper(*addr, *uiPort, *peersList, *name, *simple, antiEntropyTimer, rtimer)
 
 	//starts UI server if flag is set
 	if *startUIServer {
-		uiServer := server.StartUIServer(*uiPort, gossiper)
-		defer uiServer.Shutdown(nil)
+		// uiServer := server.StartUIServer(*uiPort, gossiper)
+		// defer uiServer.Shutdown(nil)
+		go server.StartReactServer(gossiper)
 	}
 
 	gossiper.Start()
