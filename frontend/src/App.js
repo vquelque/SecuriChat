@@ -12,7 +12,7 @@ class App extends Component {
     this.state = {
       messages: [],
       peerId: "",
-      roomList: ["a", "b", "c"]
+      roomList: []
     };
   }
 
@@ -34,16 +34,29 @@ class App extends Component {
       this.setState(prevState => ({
         messages: [...this.state.messages, msg]
       }));
+      this.addRoom(room);
     });
   }
 
   send = text => {
+    if (this.state.currentRoom == null) {
+      alert("Please select a room first !");
+      return;
+    }
     var message = JSON.stringify({
       room: this.state.currentRoom,
       destination: this.state.currentRoom,
       text: text
     });
     sendMsg(message);
+  };
+
+  addRoom = room => {
+    if (this.state.roomList.indexOf(room) === -1) {
+      this.setState(prevRoomList => ({
+        roomList: [...this.state.roomList, room]
+      }));
+    }
   };
 
   joinChat = room => {

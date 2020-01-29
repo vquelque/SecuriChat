@@ -4,12 +4,14 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"github.com/coyim/otr3"
-	"github.com/vquelque/SecuriChat/crypto"
-	"github.com/vquelque/SecuriChat/encConversation"
 	"log"
 	"sync"
 	"time"
+
+	"github.com/coyim/otr3"
+	"github.com/gorilla/websocket"
+	"github.com/vquelque/SecuriChat/crypto"
+	"github.com/vquelque/SecuriChat/encConversation"
 
 	"github.com/dedis/protobuf"
 	"github.com/vquelque/SecuriChat/constant"
@@ -29,6 +31,8 @@ type Gossiper struct {
 	Simple                bool
 	PeersSocket           socket.Socket
 	UISocket              socket.Socket
+	UIWebsocket           *websocket.Conn
+	UIMessages            chan *message.Message
 	VectorClock           *vector.Vector        //current status of this peer.
 	RumorStorage          *storage.RumorStorage //store all previously received rumors.
 	PrivateStorage        *storage.PrivateStorage
@@ -81,6 +85,7 @@ func NewGossiper(address string, uiPort int, peersList, name string, simple bool
 	_ = OTRpriv.Generate(rand.Reader)
 	RSAPriv, RSAPub := crypto.GenerateRSAKeypair()
 	RSAPeers := peers.NewRSAPeersSet()
+	UIMessages := make(chan (*message.Message))
 
 	return &Gossiper{
 		Name:                  name,
@@ -102,6 +107,7 @@ func NewGossiper(address string, uiPort int, peersList, name string, simple bool
 		RSAPrivateKey:         RSAPriv,
 		RSAPublickKey:         RSAPub,
 		RSAPeers:              RSAPeers,
+		UIMessages:            UIMessages,
 	}
 }
 

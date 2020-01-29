@@ -3,14 +3,15 @@ package gossiper
 import (
 	"crypto/rsa"
 	"fmt"
+	"log"
+	"math/rand"
+	"time"
+
 	"github.com/coyim/otr3"
 	"github.com/dedis/protobuf"
 	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
-	"log"
-	"math/rand"
-	"time"
 
 	"github.com/vquelque/SecuriChat/constant"
 	"github.com/vquelque/SecuriChat/message"
@@ -49,8 +50,11 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		if sender != "" {
 			if msg.Origin != gsp.Name {
 				gsp.handleEncryptedMessage(msg)
-				fmt.Println(msg.PrintRumor(sender))
-				fmt.Println(gsp.Peers.PrintPeers())
+				if msg.Text != "" {
+					fmt.Println(msg.PrintRumor(sender))
+					// fmt.Println(gsp.Peers.PrintPeers())
+					gsp.sendRumorToUi(msg)
+				}
 				if msg.RSAEncryptedMessage != nil {
 					gsp.handleRSAEncryptedMessage(msg)
 				}

@@ -27,7 +27,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // define a reader which will listen for new messages on the webSocket
-func reader(conn *websocket.Conn, gsp *gossiper.Gossiper) {
+func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 	for {
 		// read in a message
 		cliMsg := &message.Message{}
@@ -36,16 +36,29 @@ func reader(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 			log.Println(err)
 			return
 		}
-		sendMessage(conn, gsp, cliMsg)
+		switch {
+		case cliMsg.Text != "":
+			cliMsg.Origin = gsp.Name
+			go gsp.ProcessClientMessage(cliMsg)
+			gsp.UIMessages <- cliMsg
+		default:
+			log.Println("WEBUI : No action registered for this Client Message")
+		}
+
 	}
 }
-func sendMessage(conn *websocket.Conn, gsp *gossiper.Gossiper, cliMsg *message.Message) {
-	cliMsg.Origin = gsp.Name
-	go gsp.ProcessClientMessage(cliMsg)
-	if err := conn.WriteJSON(cliMsg); err != nil {
-		log.Println(err)
-		return
+
+func WriteUIMessage(gsp *gossiper.Gossiper) {
+	for {
+		select {
+		case cliMsg := <-gsp.UIMessages:
+			err := gsp.UIWebsocket.WriteJSON(cliMsg)
+			if err != nil {
+				log.Println(err)
+			}
+		}
 	}
+
 }
 
 // define our WebSocket endpoint
@@ -59,9 +72,11 @@ func serveWs(gsp *gossiper.Gossiper) http.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 		}
+		gsp.UIWebsocket = ws
 		// listen indefinitely for new messages coming
 		// through on our WebSocket connection
-		reader(ws, gsp)
+		go ReadUIMessage(ws, gsp)
+		go WriteUIMessage(gsp)
 	})
 }
 

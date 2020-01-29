@@ -13,7 +13,7 @@ class ChatBox extends Component {
   }
 
   renderMessage(message) {
-    const { origin, text, room } = message;
+    const { origin, text } = message;
     const { id } = this.props;
     const messageFromMe = id === origin;
     const cssClass = messageFromMe
