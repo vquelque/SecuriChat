@@ -2,9 +2,9 @@ package gossiper
 
 import "github.com/vquelque/SecuriChat/message"
 
-func (gsp *Gossiper) sendRumorToUi(rumor *message.RumorMessage) {
+func (gsp *Gossiper) sendRumorToUi(text string, rumor *message.RumorMessage) {
 	cliMsg := &message.Message{
-		Text:   rumor.Text,
+		Text:   text,
 		Origin: rumor.Origin,
 		Room:   rumor.Origin,
 	}

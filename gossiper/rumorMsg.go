@@ -63,7 +63,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 				if msg.Text != "" {
 					fmt.Println(msg.PrintRumor(sender))
 					// fmt.Println(gsp.Peers.PrintPeers())
-					gsp.sendRumorToUi(msg)
+					gsp.sendRumorToUi(msg.Text, msg)
 				}
 			}
 		}
@@ -148,6 +148,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 				msgType = " UNAUTHENTICATED "
 			}
 			fmt.Printf("RECEIVED %s ENCR MESSAGE : \n %s \n ", msgType, plaintxt)
+			gsp.sendRumorToUi(string(plaintxt), msg)
 		case encConversation.SMP1:
 			fmt.Println("state is : ", cs.Step)
 			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)

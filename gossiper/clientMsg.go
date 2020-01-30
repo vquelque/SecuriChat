@@ -36,20 +36,14 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					cs, ok := gsp.createOrLoadConversationState(destName)
 					if !ok {
 						log.Println("Creating conversation")
-						toSend, _ := cs.Conversation.Send(otr3.ValidMessage(encConversation.QueryTextMessage))
-						encMsg := &message.EncryptedMessage{
-							Message: toSend[0],
-							Step:    cs.Step,
-							Dest:    "",
-						}
-						pub := gsp.RSAPeers.GetPeerPublicKey(destName)
-						if pub == nil {
-							log.Printf("Can't send to peer %s if there is no public key \n", destName)
+						if gsp.initiateKeyExchange(cs, destName) {
 							return
 						}
-						gsp.sendRSAKeyExchangeMessage(encMsg, pub)
 					} else {
 						log.Println("convo loaded")
+						if cs.Step == 0 {
+							gsp.initiateKeyExchange(cs, destName)
+						}
 					}
 					cs.Buffer <- msg.Text
 					return
@@ -63,9 +57,9 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 							Encrypted:   true,
 							Destination: msg.Destination,
 						}
-						gsp.ProcessClientMessage(msg2)
-
 						log.Println("conversation didn't exist ", msg.Destination, " was requested, now initializing new conversation")
+						go gsp.ProcessClientMessage(msg2)
+
 					}
 					go func() { cs.QuestionChan <- [2]string{msg.AuthQuestion, msg.AuthAnswer} }()
 					//gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
@@ -90,6 +84,22 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 			}
 		}
 	}
+}
+
+func (gsp *Gossiper) initiateKeyExchange(cs *encConversation.ConversationState, destName string) bool {
+	toSend, _ := cs.Conversation.Send(otr3.ValidMessage(encConversation.QueryTextMessage))
+	encMsg := &message.EncryptedMessage{
+		Message: toSend[0],
+		Step:    cs.Step,
+		Dest:    "",
+	}
+	pub := gsp.RSAPeers.GetPeerPublicKey(destName)
+	if pub == nil {
+		log.Printf("Can't send to peer %s if there is no public key \n", destName)
+		return true
+	}
+	gsp.sendRSAKeyExchangeMessage(encMsg, pub)
+	return false
 }
 
 func (gsp *Gossiper) registeringPublicKey(dest []string) {
