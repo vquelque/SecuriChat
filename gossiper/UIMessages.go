@@ -1,12 +1,20 @@
 package gossiper
 
-import "github.com/vquelque/SecuriChat/message"
+import (
+	"github.com/vquelque/SecuriChat/encConversation"
+	"github.com/vquelque/SecuriChat/message"
+)
 
 func (gsp *Gossiper) sendRumorToUi(text string, rumor *message.RumorMessage) {
+	auth := message.NOT_AUTHENTICATED
+	if rumor.EncryptedMessage.Step == encConversation.AuthenticationOK {
+		auth = message.AUTHENTICATED
+	}
 	cliMsg := &message.Message{
-		Text:   text,
-		Origin: rumor.Origin,
-		Room:   rumor.Origin,
+		Text:          text,
+		Origin:        rumor.Origin,
+		Room:          rumor.Origin,
+		Authenticated: auth,
 	}
 	gsp.UIMessages <- cliMsg
 }
