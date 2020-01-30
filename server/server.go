@@ -127,7 +127,7 @@ func setupRoutes(gsp *gossiper.Gossiper) {
 	http.HandleFunc("/init", initHandler(gsp))
 }
 
-func StartReactServer(gsp *gossiper.Gossiper, port int) {
+func StartReactServer(gsp *gossiper.Gossiper) {
 	fmt.Println("Running SecuriChat websocket server")
 	setupRoutes(gsp)
 	err := http.ListenAndServe(":8080", nil)
