@@ -16,8 +16,8 @@ class App extends Component {
       peerId: "",
       roomList: [],
       authPopup: false,
-      authQuestion: "sdfghjsdfghj",
-      origin: "fergt"
+      authQuestion: "",
+      origin: ""
     };
   }
 
@@ -108,6 +108,14 @@ class App extends Component {
     });
   };
 
+  sendAuthAnswer = (authAnswer, peerId) => {
+    var message = JSON.stringify({
+      Room: peerId,
+      AuthAnswer: authAnswer
+    });
+    sendMsg(message);
+  };
+
   render() {
     return (
       <div className="App">
@@ -134,6 +142,7 @@ class App extends Component {
             peerID={this.state.origin}
             authQuestion={this.state.authQuestion}
             open={this.state.authPopup}
+            sendAuthAnswer={this.sendAuthAnswer}
           />
           <footer className="chat-footer">
             <Input send={this.send} />

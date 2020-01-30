@@ -30,6 +30,7 @@ class AuthPopup extends Component {
     alert("Answer send to peer !");
     event.preventDefault();
     // send the auth answer
+    this.props.sendAuthAnswer(this.state.AuthAnswer, this.props.peerID);
   }
 
   render() {
