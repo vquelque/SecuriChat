@@ -50,9 +50,9 @@ class App extends Component {
       id: id,
       authenticated: authenticated
     };
-    let roomIndex = roomAlreadyPresent(room, this.state.roomList);
+    let roomIndex = roomAlreadyPresent(room.id, this.state.roomList);
     if (roomIndex === -1) {
-      console.log("adding room " + id);
+      console.log("adding room " + id + " " + authenticated);
       this.setState(() => ({
         roomList: [...this.state.roomList, room]
       }));
@@ -85,12 +85,14 @@ class App extends Component {
       room !== "" &&
       text === ""
     ) {
+      console.log("Auth OK received");
       let roomIndex = roomAlreadyPresent(room, this.state.roomList);
+      console.log(roomIndex);
       if (roomIndex !== -1) {
         this.setState(prevState => {
-          let nRoomList = Object.assign({}, prevState.roomList); // creating copy of state variable jasper
-          nRoomList[roomIndex].authenticated = "AUTHENTICATION_OK"; // update the name property, assign a new value
-          return { nRoomList };
+          var roomList = [...this.state.roomList];
+          roomList[roomIndex].authenticated = "AUTHENTICATION_OK";
+          return { roomList };
         });
       } else {
         this.addRoom(room, "AUTHENTICATION_OK");
@@ -173,13 +175,11 @@ class App extends Component {
 
 export default App;
 
-function roomAlreadyPresent(room, roomList) {
-  let index = -1;
+function roomAlreadyPresent(roomID, roomList) {
   for (var i = 0; i < roomList.length; i++) {
-    if (roomList[i].id === room.id) {
-      index = i;
-      break;
+    if (roomList[i].id === roomID) {
+      return i;
     }
   }
-  return index;
+  return -1;
 }

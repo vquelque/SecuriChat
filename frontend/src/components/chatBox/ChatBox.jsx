@@ -7,12 +7,12 @@ class ChatBox extends Component {
     const roomMsg = messages.filter(m => m.room === currentRoom);
     return (
       <ul className="Messages-list">
-        {roomMsg.map(msg => this.renderMessage(msg))}
+        {roomMsg.map((msg, index) => this.renderMessage(msg, index))}
       </ul>
     );
   }
 
-  renderMessage(message) {
+  renderMessage(message, index) {
     const { origin, text } = message;
     const { id } = this.props;
     const messageFromMe = id === origin;
@@ -20,7 +20,7 @@ class ChatBox extends Component {
       ? "Messages-message currentMember"
       : "Messages-message";
     return (
-      <li className={cssClass} key="">
+      <li className={cssClass} key={index}>
         <div className="Message-content">
           <div className="username">{origin}</div>
           <div className="text">{text}</div>
