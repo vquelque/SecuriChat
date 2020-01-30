@@ -27,7 +27,10 @@ func (gsp *Gossiper) sendAuthQuestionToUi(msg *message.Message) {
 		Authenticated: message.NOT_AUTHENTICATED,
 		AuthQuestion:  msg.AuthQuestion,
 	}
-	gsp.UIMessages <- cliMsg
+	select {
+	case gsp.UIMessages <- cliMsg:
+	default:
+	}
 }
 
 func (gsp *Gossiper) sendAuthOK(peerID string) {
@@ -35,5 +38,8 @@ func (gsp *Gossiper) sendAuthOK(peerID string) {
 		Room:          peerID,
 		Authenticated: message.AUTHENTICATED,
 	}
-	gsp.UIMessages <- cliMsg
+	select {
+	case gsp.UIMessages <- cliMsg:
+	default:
+	}
 }

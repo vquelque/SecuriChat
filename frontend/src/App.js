@@ -50,9 +50,9 @@ class App extends Component {
       id: id,
       authenticated: authenticated
     };
-    console.log("adding room " + id);
     let roomIndex = roomAlreadyPresent(room, this.state.roomList);
     if (roomIndex === -1) {
+      console.log("adding room " + id);
       this.setState(() => ({
         roomList: [...this.state.roomList, room]
       }));
@@ -72,6 +72,7 @@ class App extends Component {
       AuthAnswer: AuthAnswer
     });
     sendMsg(message);
+    this.setState({ AuthQuestion: "", AuthAnswer: "" });
   };
 
   messageHandler = (origin, text, room, authenticated, authQuestion) => {
