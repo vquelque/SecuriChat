@@ -45,7 +45,18 @@ sleep 5
 ./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA1 -destName=A
 ./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA2 -destName=A
 ./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA3 -destName=A
-./client/client -UIPort 12348 -encrypted=true -msg=eeLoFromDtoA -destName=A
+sleep 10
+./client/client -UIPort 12345 -encrypted=true -authQuestion="My name is?" -authAnswer="A" -destName=F
+sleep 7
+./client/client -UIPort 12350 -encrypted=true -authAnswer="A" -destName=A
+sleep 5
+./client/client -UIPort 12348 -encrypted=true -authQuestion="My name is?" -authAnswer="D" -destName=A
+sleep 7
+./client/client -UIPort 12345 -encrypted=true -authAnswer="D" -destName=D
+sleep 10
+./client/client -UIPort 12350 -encrypted=true -msg="F and A should be auth " -destName=A
+sleep 5
+./client/client -UIPort 12345 -encrypted=true -msg="D and A sould be auth" -destName=D
 sleep 30
 pkill -f SecuriChat
 

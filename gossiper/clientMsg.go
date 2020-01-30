@@ -54,7 +54,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					cs.Buffer <- msg.Text
 					return
 				} else if msg.AuthQuestion != "" && msg.AuthAnswer != "" {
-					log.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion, msg.AuthAnswer)
+					fmt.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion, msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
 						log.Panic("convo didn't exist")
@@ -64,11 +64,19 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 						log.Panic(err.Error())
 					}
 					cs.Step = encConversation.SMP1
-					gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
+					encMsg := &message.EncryptedMessage{
+						Message: toSend[0],
+						Step:    cs.Step,
+						Dest:    "",
+					}
+					pub := gsp.RSAPeers.GetPeerPublicKey(msg.Destination)
+					gsp.sendRSAKeyExchangeMessage(encMsg, pub)
+					//gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
 				} else if msg.AuthAnswer != "" {
-					log.Printf("Provided answer for SMP key exchange %s", msg.AuthAnswer)
+					fmt.Printf("Provided answer for SMP key exchange %s", msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
+						log.Printf("Requested for %s by %s \n", msg.Destination, gsp.Name)
 						log.Panic("convo didn't exist")
 					}
 					go func() { cs.AnswerChan <- msg.AuthAnswer }()
