@@ -41,17 +41,16 @@ class AuthPopup extends Component {
           className="Drawer"
         >
           <div className="DrawerCard">
-            <h2>{this.props.peerID} wants to authenticate !</h2>
+            <h2>
+              {" "}
+              <strong style={{ color: "red" }}>{this.props.peerID}</strong>{" "}
+              wants to authenticate !
+            </h2>
+            <br />
             <Form style={{ width: "90%" }} onSubmit={this.handleSubmit}>
               <Form.Group>
-                <Form.Label>SMP Authentication Question : </Form.Label>
-                <input
-                  type="text"
-                  readonly
-                  class="form-control-plaintext"
-                  id="authQuestion"
-                  value={this.props.authQuestion}
-                />
+                <Form.Label>SMP Authentication Question :</Form.Label>
+                <p style={{ fontWeight: "bold" }}>{this.props.authQuestion}</p>
               </Form.Group>
               <Form.Group>
                 <Form.Label>SMP Authentication Answer </Form.Label>
@@ -61,17 +60,11 @@ class AuthPopup extends Component {
                   name="AuthAnswer"
                 />
               </Form.Group>
-              <Button
-                variant="primary"
-                type="submit"
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center"
-                }}
-              >
-                Send the Answer !
-              </Button>
+              <Form.Group>
+                <Button variant="success" type="submit" block>
+                  Send the Answer !
+                </Button>
+              </Form.Group>
             </Form>
           </div>
         </Drawer>

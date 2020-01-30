@@ -16,8 +16,8 @@ class App extends Component {
       peerId: "",
       roomList: [],
       authPopup: false,
-      authQuestion: "",
-      origin: ""
+      authQuestion: "sdfghjsdfghj",
+      origin: "fergt"
     };
   }
 
@@ -139,7 +139,6 @@ class App extends Component {
             <Input send={this.send} />
           </footer>
         </section>
-        ;
       </div>
     );
   }
