@@ -8,24 +8,20 @@ import (
 
 const maxBufferSize = 100
 
-
-
-type DebugSMPEventHandler struct{
-	dest string
+type DebugSMPEventHandler struct {
+	dest         string
 	convStateMap *encConversation.ConvStateMap
 }
 
 // HandleSMPEvent dumps all SMP events
 func (d DebugSMPEventHandler) HandleSMPEvent(event otr3.SMPEvent, progressPercent int, question string) {
-	if event.String() == "SMPEventAbort"{
+	if event.String() == "SMPEventAbort" {
 		log.Println("Warning, error with SMP Protocol, conversation will be destroyed")
 		d.convStateMap.DestroyConversation(d.dest)
 	}
 }
 
-
-
-func (gsp *Gossiper) createConversationState(dest string) (cs *encConversation.ConversationState){
+func (gsp *Gossiper) createConversationState(dest string) (cs *encConversation.ConversationState) {
 	c := &otr3.Conversation{}
 	priv := gsp.loadPrivateKey()
 	c.SetOurKeys([]otr3.PrivateKey{priv})
@@ -33,13 +29,14 @@ func (gsp *Gossiper) createConversationState(dest string) (cs *encConversation.C
 	// set the Policies.
 	c.Policies.RequireEncryption()
 	c.Policies.AllowV3()
-	handler := DebugSMPEventHandler{dest:dest,convStateMap:gsp.convStateMap}
+	handler := DebugSMPEventHandler{dest: dest, convStateMap: gsp.convStateMap}
 	c.SetSMPEventHandler(handler)
-	cs =  &encConversation.ConversationState{
+	cs = &encConversation.ConversationState{
 		Step:         0,
 		Conversation: c,
 		Buffer:       make(chan string, maxBufferSize),
 		AnswerChan:   make(chan string),
+		QuestionChan: make(chan [2]string),
 	}
 
 	return cs

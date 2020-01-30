@@ -57,20 +57,17 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					fmt.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion, msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
-						log.Panic("conversation didn't exist ", msg.Destination, " was requested")
+						msg2 := &message.Message{
+							Text:        "Initiating conversation",
+							Origin:      msg.Origin,
+							Encrypted:   true,
+							Destination: msg.Destination,
+						}
+						gsp.ProcessClientMessage(msg2)
+
+						log.Println("conversation didn't exist ", msg.Destination, " was requested, now initializing new conversation")
 					}
-					toSend, err := cs.Conversation.StartAuthenticate(msg.AuthQuestion, []byte(msg.AuthAnswer))
-					if err != nil {
-						log.Panic(err.Error())
-					}
-					cs.Step = encConversation.SMP1
-					encMsg := &message.EncryptedMessage{
-						Message: toSend[0],
-						Step:    cs.Step,
-						Dest:    "",
-					}
-					pub := gsp.RSAPeers.GetPeerPublicKey(msg.Destination)
-					gsp.sendRSAKeyExchangeMessage(encMsg, pub)
+					go func() { cs.QuestionChan <- [2]string{msg.AuthQuestion, msg.AuthAnswer} }()
 					//gsp.sendEncryptedMessage(toSend[0], cs, msg.Destination)
 				} else if msg.AuthAnswer != "" {
 					fmt.Printf("Provided answer for SMP key exchange %s", msg.AuthAnswer)

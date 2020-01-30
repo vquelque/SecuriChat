@@ -17,7 +17,6 @@ const (
 	SMP2             = iota
 	SMP3             = iota
 	SMP4             = iota
-	SMP5             = iota
 	AuthenticationOK = iota
 	QueryTextMessage = "?OTRv3?"
 )
@@ -27,6 +26,7 @@ type ConversationState struct {
 	Conversation *otr3.Conversation
 	Buffer       chan string
 	AnswerChan   chan string
+	QuestionChan chan [2]string
 }
 
 type ConvStateMap struct {
