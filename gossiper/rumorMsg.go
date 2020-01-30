@@ -129,12 +129,14 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 				log.Println("Key exchange is finished")
 				cs.Step = encConversation.AkeFinished
 				go gsp.sendBufferedEncrRumors(cs, msg)
+				go gsp.sendQuestion(cs, msg.Origin)
 
 			}
 		case encConversation.Sig:
 			log.Println("Key exchange is finished")
 			cs.Step = encConversation.AkeFinished
 			go gsp.sendBufferedEncrRumors(cs, msg)
+			go gsp.sendQuestion(cs, msg.Origin)
 		case encConversation.AkeFinished, encConversation.AuthenticationOK:
 			// A message was received
 			if string(plaintxt) == "" {
@@ -205,6 +207,23 @@ func (gsp *Gossiper) sendBufferedEncrRumors(cs *encConversation.ConversationStat
 	for textMessage := range cs.Buffer {
 		gsp.sendEncryptedTextMessage(cs, textMessage, msg.Origin)
 	}
+}
+
+func (gsp *Gossiper) sendQuestion(cs *encConversation.ConversationState, destination string) {
+	qA := <-cs.QuestionChan
+	fmt.Println("Sending question")
+	toSend, err := cs.Conversation.StartAuthenticate(qA[0], []byte(qA[1]))
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	cs.Step = encConversation.SMP1
+	encMsg := &message.EncryptedMessage{
+		Message: toSend[0],
+		Step:    cs.Step,
+		Dest:    "",
+	}
+	pub := gsp.RSAPeers.GetPeerPublicKey(destination)
+	gsp.sendRSAKeyExchangeMessage(encMsg, pub)
 }
 
 func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConversation.ConversationState, dest string) {
