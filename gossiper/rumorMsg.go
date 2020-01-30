@@ -3,12 +3,12 @@ package gossiper
 import (
 	"crypto/rsa"
 	"fmt"
+	"github.com/vquelque/SecuriChat/utils"
 	"log"
 	"math/rand"
 	"time"
 
 	"github.com/coyim/otr3"
-	"github.com/dedis/protobuf"
 	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/encConversation"
 	"github.com/vquelque/SecuriChat/pow"
@@ -49,14 +49,21 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 		//if sender is nil then it is a client message
 		if sender != "" {
 			if msg.Origin != gsp.Name {
-				gsp.handleEncryptedMessage(msg)
+				if msg.ID == 1 {
+					gsp.parseAndStoreRSAPublicKey(msg.Text, msg.Origin)
+					log.Println("sending pub key")
+					gsp.sendRumor(sender, msg)
+					return
+				}
+				if len(msg.RSAEncryptedMessage) > 0 {
+					gsp.handleRSAEncryptedMessage(msg)
+				} else {
+					gsp.handleEncryptedMessage(msg)
+				}
 				if msg.Text != "" {
 					fmt.Println(msg.PrintRumor(sender))
 					// fmt.Println(gsp.Peers.PrintPeers())
 					gsp.sendRumorToUi(msg)
-				}
-				if msg.RSAEncryptedMessage != nil {
-					gsp.handleRSAEncryptedMessage(msg)
 				}
 			}
 		}
@@ -84,8 +91,8 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	if encryptedMessage != nil {
 		log.Println("handling enc msg")
 		if encryptedMessage.Dest != gsp.Name {
-			log.Println("not me!")
-			return
+			log.Println("Recived encrypted OTR message, might not be for me")
+			//return
 		}
 		//Get conversation
 		cs, _ := gsp.createOrLoadConversationState(msg.Origin)
@@ -97,6 +104,8 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 
 		plaintxt, toSend, err := cs.Conversation.Receive(encryptedMessage.Message)
 		if err != nil {
+			log.Println(string(encryptedMessage.Message))
+			log.Println(plaintxt)
 			log.Fatal(err.Error())
 		}
 
@@ -113,22 +122,20 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 					Step:    cs.Step,
 					Dest:    "",
 				}
-				gsp.sendRSAKeyExchangeMessage(encMsg, cs.PublicKeyOfPeer)
+				pub := gsp.RSAPeers.GetPeerPublicKey(msg.Origin)
+				gsp.sendRSAKeyExchangeMessage(encMsg, pub)
 			}
 
 			if cs.Step == encConversation.Sig {
+				log.Println("Key exchange is finished")
 				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
 				go gsp.sendBufferedEncrRumors(cs, msg)
 
 			}
 		case encConversation.Sig:
 			log.Println("Key exchange is finished")
-			go gsp.sendBufferedEncrRumors(cs, msg)
 			cs.Step = encConversation.AkeFinished
+			go gsp.sendBufferedEncrRumors(cs, msg)
 		case encConversation.AkeFinished, encConversation.AuthenticationOK:
 			// A message was received
 			msgType := " AUTHENTICATED "
@@ -143,16 +150,6 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
 			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
-
-			if cs.Step == encConversation.Sig {
-				cs.Step = encConversation.AkeFinished
-				log.Println("Sending hello msg")
-				hello := "hello"
-				gsp.sendEncryptedTextMessage(cs, hello, msg.Origin)
-
-				go gsp.sendBufferedEncrRumors(cs, msg)
-
-			}
 
 		}
 	} else {
@@ -179,14 +176,17 @@ func (gsp *Gossiper) sendEncryptedMessage(toSend otr3.ValidMessage, cs *encConve
 }
 
 func (gsp *Gossiper) sendRSAKeyExchangeMessage(encryptedRumor *message.EncryptedMessage, peerPublicKey *rsa.PublicKey) {
-	enc, err := protobuf.Encode(encryptedRumor)
-	if err != nil {
-		log.Printf("Error encrypting OTR derivation message with RSA")
-	}
-	encr := crypto.RSAEncrypt(enc, peerPublicKey)
+	hash := GetHashOfEncryptedMessage(encryptedRumor)
+	encr := crypto.RSAEncrypt(hash[:], peerPublicKey)
 	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
-	rumor := message.NewRSARumorMessage(gsp.Name, mID, encr)
+	rumor := message.NewRSARumorMessage(gsp.Name, mID, encr, encryptedRumor)
 	gsp.processRumorMessage(rumor, "")
+}
+
+func GetHashOfEncryptedMessage(encryptedRumor *message.EncryptedMessage) utils.SHA256 {
+	enc := encryptedRumor.Encode()
+	hash := utils.SHA256Hash(enc)
+	return hash
 }
 
 func (gsp *Gossiper) sendEncryptedTextMessage(cs *encConversation.ConversationState, text string, dest string) {

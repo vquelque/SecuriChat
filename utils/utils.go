@@ -61,10 +61,9 @@ func SliceToHash(hash []byte) SHA256 {
 	return h
 }
 
-func Hash(data []byte)SHA256  {
+func SHA256Hash(data []byte) SHA256 {
 	return sha256.Sum256(data)
 }
-
 
 func EncodeUint64(i uint64) []byte {
 	b := make([]byte, 8)

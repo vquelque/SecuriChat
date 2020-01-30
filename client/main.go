@@ -31,9 +31,12 @@ func main() {
 	}
 
 	msg := &message.Message{}
-	if *destinationName != "" && *destinationPubKey != "" {
-		msg.Destination = *destinationName + "," + *destinationPubKey
+	msg.Destination = *destinationName
+	if *destinationPubKey != "" {
+		msg.Destination = msg.Destination + "," + *destinationPubKey
+
 	}
+
 	msg.Text = *text
 	msg.Encrypted = *encrypted
 	msg.AuthAnswer = *authAnswer

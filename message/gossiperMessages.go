@@ -80,17 +80,19 @@ func NewRumorMessage(origin string, ID uint32, text string) *RumorMessage {
 //NewRumorMessage creates a new EncryptedRumorMessage.
 func NewRumorMessageWithEncryptedData(origin string, ID uint32, message *EncryptedMessage) *RumorMessage {
 	return &RumorMessage{
-		Origin:           origin,
-		ID:               ID,
-		EncryptedMessage: message,
+		Origin:              origin,
+		ID:                  ID,
+		EncryptedMessage:    message,
+		RSAEncryptedMessage: nil,
 	}
 }
 
-func NewRSARumorMessage(origin string, ID uint32, message RSAEncryptedMessage) *RumorMessage {
+func NewRSARumorMessage(origin string, ID uint32, message RSAEncryptedMessage, encryptedMessage *EncryptedMessage) *RumorMessage {
 	return &RumorMessage{
 		Origin:              origin,
 		ID:                  ID,
 		RSAEncryptedMessage: message,
+		EncryptedMessage:    encryptedMessage,
 	}
 }
 
@@ -101,6 +103,7 @@ func (msg *RumorMessage) Encode() []byte {
 		b = append(b, msg.EncryptedMessage.Encode()...)
 	}
 	b = append(b, msg.Text...)
+	b = append(b, msg.RSAEncryptedMessage...)
 	return b
 }
 

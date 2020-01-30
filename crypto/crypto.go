@@ -4,6 +4,9 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
 	"log"
 
 	"github.com/vquelque/SecuriChat/message"
@@ -20,7 +23,10 @@ func RSAEncrypt(data []byte, destPublicKey *rsa.PublicKey) message.RSAEncryptedM
 		label,
 	)
 	if err != nil {
+		log.Println(len(data))
+		log.Println(err.Error())
 		log.Fatal("Error encrypting the RSA message")
+
 	}
 	return encryptedMessage
 }
@@ -43,5 +49,16 @@ func GenerateRSAKeypair() (priv *rsa.PrivateKey, pub *rsa.PublicKey) {
 	if err != nil {
 		log.Fatal("Error generating the RSA keypair")
 	}
+	PrintPublicKey(&private.PublicKey)
 	return private, &private.PublicKey
+}
+
+func PrintPublicKey(pub *rsa.PublicKey) []byte {
+	asn1Key, _ := x509.MarshalPKIXPublicKey(pub)
+	pubBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: asn1Key,
+	})
+	fmt.Println(string(pubBytes))
+	return pubBytes
 }

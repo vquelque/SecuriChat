@@ -249,5 +249,9 @@ func (gsp *Gossiper) Start() {
 	if gsp.Rtimer > 0 {
 		gsp.startRoutingMessageHandler()
 	}
+	pubKey := crypto.PrintPublicKey(gsp.RSAPublickKey)
+	mID := gsp.VectorClock.NextMessageForPeer(gsp.Name)
+	m := message.NewRumorMessage(gsp.Name, mID, string(pubKey))
+	gsp.processRumorMessage(m, "")
 	fmt.Printf("Gossiper running at address %s, unique peer id : %s \n", gsp.PeersSocket.Address(), gsp.Name)
 }

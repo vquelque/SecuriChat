@@ -1,30 +1,36 @@
 package gossiper
 
 import (
-	"log"
-
-	"github.com/dedis/protobuf"
+	"bytes"
 	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/message"
+	"log"
 )
 
 func (gsp *Gossiper) handleRSAEncryptedMessage(rumor *message.RumorMessage) {
+	log.Println("Handling RSA msg from", rumor.Origin)
 	if !gsp.RSAPeers.Contains(rumor.Origin) {
+		log.Println("Origin isn't known by the gossiper")
 		return
 	}
-	plain, err := crypto.RSADecrypt(rumor.RSAEncryptedMessage, gsp.RSAPrivateKey)
+	encHash, err := crypto.RSADecrypt(rumor.RSAEncryptedMessage, gsp.RSAPrivateKey)
 	if err != nil {
 		log.Printf("Received encryted rumor but is not for us. \n")
 		return
 	}
-	encMessage := &message.EncryptedMessage{}
-	protobuf.Decode(plain, encMessage)
-	log.Printf("successfully decrypted RSA encrypted message. Starting key exchange. \n", plain)
-	encRumor := &message.RumorMessage{
-		Origin:           rumor.Origin,
-		ID:               rumor.ID,
-		Text:             rumor.Text,
-		EncryptedMessage: encMessage,
+	hash := GetHashOfEncryptedMessage(rumor.EncryptedMessage)
+	i := hash[:]
+	isEq := bytes.Compare(encHash, i)
+	if isEq != 0 {
+		log.Println(isEq)
+		log.Println(len(i))
+		log.Println(len(encHash))
+		log.Println("Hash isn't equal, something is wrong")
+		log.Println(hash)
+		log.Println(encHash)
+		return
 	}
-	go gsp.handleEncryptedMessage(encRumor)
+
+	log.Printf("successfully decrypted RSA encrypted message. Starting key exchange. \n")
+	gsp.handleEncryptedMessage(rumor)
 }

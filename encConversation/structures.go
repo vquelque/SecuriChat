@@ -1,7 +1,6 @@
 package encConversation
 
 import (
-	"crypto/rsa"
 	"sync"
 
 	"github.com/coyim/otr3"
@@ -24,11 +23,10 @@ const (
 )
 
 type ConversationState struct {
-	Step            int // step of the Auth. Key. Exchange (AKE)
-	Conversation    *otr3.Conversation
-	Buffer          chan string
-	AnswerChan      chan string
-	PublicKeyOfPeer *rsa.PublicKey
+	Step         int // step of the Auth. Key. Exchange (AKE)
+	Conversation *otr3.Conversation
+	Buffer       chan string
+	AnswerChan   chan string
 }
 
 type ConvStateMap struct {
