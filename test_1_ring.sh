@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+pkill -f SecuriChat
 go build
 cd client
 go build
@@ -35,9 +35,17 @@ do
 	name=$(echo "$name" | tr "A-Y" "B-Z")
 done
 
-./client/client -UIPort 12345 -encrypted=true -msg=eeLo -dest=F
+sleep 15
+./client/client -UIPort 12345 -encrypted=true -msg=eeLoFromAtoF -destName=F
+./client/client -UIPort 12345 -encrypted=true -msg=eeLoFromAtoD -destName=D
 sleep 2
-./client/client -UIPort 12348 -encrypted=true -msg=hi -dest=C
-sleep 60
-pkill -f Peerster
+./client/client -UIPort 12346 -encrypted=true -msg=hi -destName=C
+sleep 5
+./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA -destName=A
+./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA1 -destName=A
+./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA2 -destName=A
+./client/client -UIPort 12350 -encrypted=true -msg=eeLoFromFtoA3 -destName=A
+./client/client -UIPort 12348 -encrypted=true -msg=eeLoFromDtoA -destName=A
+sleep 30
+pkill -f SecuriChat
 
