@@ -159,19 +159,23 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 		case encConversation.SMP2, encConversation.SMP3, encConversation.SMP4:
 			fmt.Println("state is : ", cs.Step)
 			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)
-			cs.Step = encryptedMessage.Step + 1
-			if encryptedMessage.Step == encConversation.SMP4 || cs.Step == encConversation.SMP3 {
+			if encryptedMessage.Step == encConversation.SMP4 {
 				cs.Step = encConversation.AuthenticationOK
 				return
 			}
+			cs.Step = encryptedMessage.Step + 1
 			log.Println("state final is : ", cs.Step)
 			encMsg := &message.EncryptedMessage{
 				Message: toSend[0],
 				Step:    cs.Step,
 				Dest:    "",
 			}
+			if cs.Step == encConversation.SMP4 {
+				cs.Step = encConversation.AuthenticationOK
+			}
 			pub := gsp.RSAPeers.GetPeerPublicKey(msg.Origin)
 			gsp.sendRSAKeyExchangeMessage(encMsg, pub)
+
 			//gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
 		}
