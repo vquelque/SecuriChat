@@ -160,7 +160,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			fmt.Println("state is : ", cs.Step)
 			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)
 			cs.Step = encryptedMessage.Step + 1
-			if encryptedMessage.Step == encConversation.SMP4 || cs.Step == encConversation.SMP4 {
+			if encryptedMessage.Step == encConversation.SMP4 || cs.Step == encConversation.SMP3 {
 				cs.Step = encConversation.AuthenticationOK
 				return
 			}
