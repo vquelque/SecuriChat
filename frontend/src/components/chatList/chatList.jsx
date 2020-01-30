@@ -7,7 +7,7 @@ const ChatList = props => {
   const { rooms, currentRoom, connectToRoom } = props;
 
   const roomList = rooms.map(room => {
-    const roomIcon = room.authenticated === AUTHENTICATED ? "🔒" : "🔓";
+    const roomIcon = room.authenticated === AUTHENTICATED ? "🔒" : "🌐";
     const isRoomActive = room.id === currentRoom ? "active" : "";
     return (
       <li

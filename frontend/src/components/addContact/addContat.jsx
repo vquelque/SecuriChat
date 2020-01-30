@@ -31,7 +31,11 @@ class AddContact extends Component {
       event.preventDefault();
       return;
     }
-    alert("Contact added. Key echange will start..");
+    if (this.state.AuthQuestion === "" || this.state.AuthAnswer === "") {
+      alert("Contact added without authentication !!");
+    } else {
+      alert("Contact added. Key echange and authentication will start..");
+    }
     event.preventDefault();
     this.toggle();
     this.props.addContact(

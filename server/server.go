@@ -42,10 +42,14 @@ func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 			cliMsg.Origin = gsp.Name
 			go gsp.ProcessClientMessage(cliMsg)
 			gsp.UIMessages <- cliMsg
+		case cliMsg.Room != "":
+			cliMsg.Text = "hello !"
+			cliMsg.Destination = cliMsg.Room
+			go gsp.ProcessClientMessage(cliMsg)
+			gsp.UIMessages <- cliMsg
 		case cliMsg.AuthQuestion != "" && cliMsg.AuthAnswer != "" && cliMsg.Room != "":
 			log.Println("WEBUI : Clients wants to add a peer with auth.")
 			// client wants to add a contact. Room is the peerID.
-			cliMsg.Encrypted = true
 			cliMsg.Destination = cliMsg.Room
 			go gsp.ProcessClientMessage(cliMsg)
 		case cliMsg.AuthAnswer != "" && cliMsg.Room != "":

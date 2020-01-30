@@ -1,7 +1,5 @@
 package message
 
-import "fmt"
-
 //Message corresponds to the message send from the UI client to gossiper
 
 const AUTHENTICATED = "AUTHENTICATION_OK"
@@ -23,6 +21,5 @@ type Message struct {
 //Print client message
 func (msg *Message) String() string {
 	str := "CLIENT MESSAGE "
-	str += fmt.Sprintln(msg)
 	return str
 }
