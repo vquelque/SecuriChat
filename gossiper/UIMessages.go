@@ -16,7 +16,10 @@ func (gsp *Gossiper) sendRumorToUi(text string, rumor *message.RumorMessage) {
 		Room:          rumor.Origin,
 		Authenticated: auth,
 	}
-	gsp.UIMessages <- cliMsg
+	select {
+	case gsp.UIMessages <- cliMsg:
+	default:
+	}
 }
 
 func (gsp *Gossiper) sendAuthQuestionToUi(msg *message.Message) {
