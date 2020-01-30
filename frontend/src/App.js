@@ -114,6 +114,7 @@ class App extends Component {
       AuthAnswer: authAnswer
     });
     sendMsg(message);
+    this.closeAuthPopup();
   };
 
   render() {
