@@ -1,3 +1,3 @@
-import ChatBox from "./ChatBox.jsx/index.js";
+import ChatBox from "./ChatBox.jsx";
 
 export default ChatBox;

@@ -5,6 +5,7 @@ import Header from "./components/header/Header";
 import ChatBox from "./components/chatBox/ChatBox";
 import Input from "./components/input/input";
 import ChatList from "./components/chatList/chatList";
+import AddContact from "./components/addContact/addContat";
 
 class App extends Component {
   constructor(props) {
@@ -24,18 +25,7 @@ class App extends Component {
       }));
     });
 
-    connect((origin, text, room) => {
-      var msg = {
-        origin: origin,
-        text: text,
-        room: room
-      };
-
-      this.setState(prevState => ({
-        messages: [...this.state.messages, msg]
-      }));
-      this.addRoom(room);
-    });
+    connect(this.messageHandler);
   }
 
   send = text => {
@@ -51,9 +41,14 @@ class App extends Component {
     sendMsg(message);
   };
 
-  addRoom = room => {
-    if (this.state.roomList.indexOf(room) === -1) {
-      this.setState(prevRoomList => ({
+  addRoom = (id, authenticated) => {
+    var room = {
+      id: id,
+      authenticated: authenticated
+    };
+    console.log("adding room " + id);
+    if (!roomAlreadyPresent(room, this.state.roomList)) {
+      this.setState(() => ({
         roomList: [...this.state.roomList, room]
       }));
     }
@@ -61,8 +56,35 @@ class App extends Component {
 
   joinChat = room => {
     this.setState(prevState => ({
-      currentRoom: room
+      currentRoom: room.id
     }));
+  };
+
+  addContact = (contactID, AuthQuestion, AuthAnswer) => {
+    var message = JSON.stringify({
+      Room: contactID,
+      AuthQuestion: AuthQuestion,
+      AuthAnswer: AuthAnswer
+    });
+    sendMsg(message);
+  };
+
+  messageHandler = (origin, text, room, authenticated, authQuestion) => {
+    if (authQuestion !== "") {
+      console.log("AuthQuestion received");
+      //Handle auth question
+    } else {
+      var msg = {
+        origin: origin,
+        text: text,
+        room: room,
+        authenticated: authenticated
+      };
+      this.setState(prevState => ({
+        messages: [...this.state.messages, msg]
+      }));
+      this.addRoom(room, authenticated);
+    }
   };
 
   render() {
@@ -78,6 +100,7 @@ class App extends Component {
             currentRoom={this.state.currentRoom}
             connectToRoom={this.joinChat}
           />
+          <AddContact addContact={this.addContact} />
         </aside>
         <section className="chat-screen">
           <Header className="chat-header" peerID={this.state.currentRoom} />
@@ -96,3 +119,11 @@ class App extends Component {
 }
 
 export default App;
+
+function roomAlreadyPresent(room, roomList) {
+  for (var i = 0; i < roomList.length; i++) {
+    if (roomList[i].id === room.id) {
+      return true;
+    }
+  }
+}
