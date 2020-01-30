@@ -42,7 +42,7 @@ func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 			cliMsg.Origin = gsp.Name
 			go gsp.ProcessClientMessage(cliMsg)
 			gsp.UIMessages <- cliMsg
-		case cliMsg.Room != "":
+		case cliMsg.Room != "" && cliMsg.AuthAnswer == "":
 			cliMsg.Text = ""
 			cliMsg.Destination = cliMsg.Room
 			go gsp.ProcessClientMessage(cliMsg)
