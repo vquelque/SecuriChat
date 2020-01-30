@@ -10,3 +10,14 @@ func (gsp *Gossiper) sendRumorToUi(rumor *message.RumorMessage) {
 	}
 	gsp.UIMessages <- cliMsg
 }
+
+func (gsp *Gossiper) sendAuthQuestionToUi(msg *message.Message) {
+	// a peer wants to authenticate. Send Auth question to UI
+	cliMsg := &message.Message{
+		Origin:        msg.Origin,
+		Room:          msg.Origin,
+		Authenticated: message.NOT_AUTHENTICATED,
+		AuthQuestion:  msg.AuthQuestion,
+	}
+	gsp.UIMessages <- cliMsg
+}

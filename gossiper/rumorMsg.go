@@ -67,7 +67,6 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 				}
 			}
 		}
-		//TODO CLEANLY STORE IN UIStorage
 		//pick random peer and rumormonger
 		log.Println("sending message")
 		gsp.sendRumor(sender, msg)

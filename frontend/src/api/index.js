@@ -13,7 +13,9 @@ let connect = callback => {
     var origin = json.Origin;
     var message = json.Text;
     var room = json.Room;
-    callback(origin, message, room);
+    var authenticated = json.Authenticated;
+    var authQuestion = json.AuthQuestion;
+    callback(origin, message, room, authenticated, authQuestion);
   };
 
   socket.onclose = event => {
