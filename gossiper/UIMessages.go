@@ -29,3 +29,11 @@ func (gsp *Gossiper) sendAuthQuestionToUi(msg *message.Message) {
 	}
 	gsp.UIMessages <- cliMsg
 }
+
+func (gsp *Gossiper) sendAuthOK(peerID string) {
+	cliMsg := &message.Message{
+		Room:          peerID,
+		Authenticated: message.AUTHENTICATED,
+	}
+	gsp.UIMessages <- cliMsg
+}

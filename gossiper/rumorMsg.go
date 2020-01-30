@@ -161,6 +161,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)
 			if encryptedMessage.Step == encConversation.SMP4 {
 				cs.Step = encConversation.AuthenticationOK
+				gsp.sendAuthOK(msg.Origin)
 				return
 			}
 			cs.Step = encryptedMessage.Step + 1
@@ -172,6 +173,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			}
 			if cs.Step == encConversation.SMP4 {
 				cs.Step = encConversation.AuthenticationOK
+				gsp.sendAuthOK(msg.Origin)
 			}
 			pub := gsp.RSAPeers.GetPeerPublicKey(msg.Origin)
 			gsp.sendRSAKeyExchangeMessage(encMsg, pub)

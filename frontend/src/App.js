@@ -56,15 +56,6 @@ class App extends Component {
       this.setState(() => ({
         roomList: [...this.state.roomList, room]
       }));
-    } else {
-      console.log(roomIndex);
-      if (this.state.roomList[roomIndex]["authenticated"] !== authenticated) {
-        this.setState(prevState => {
-          let nRoomList = Object.assign({}, prevState.roomList);
-          nRoomList[roomIndex].authenticated = authenticated;
-          return { nRoomList };
-        });
-      }
     }
   };
 
@@ -88,6 +79,21 @@ class App extends Component {
       //Handle auth question popup
       console.log("AuthQuestion received");
       this.openAuthPopup(authQuestion, origin);
+    } else if (
+      authenticated === "AUTHENTICATION_OK" &&
+      room !== "" &&
+      text === ""
+    ) {
+      let roomIndex = roomAlreadyPresent(room, this.state.roomList);
+      if (roomIndex !== -1) {
+        this.setState(prevState => {
+          let nRoomList = Object.assign({}, prevState.roomList); // creating copy of state variable jasper
+          nRoomList[roomIndex].authenticated = "AUTHENTICATION_OK"; // update the name property, assign a new value
+          return { nRoomList };
+        });
+      } else {
+        this.addRoom(room, "AUTHENTICATION_OK");
+      }
     } else {
       var msg = {
         origin: origin,
