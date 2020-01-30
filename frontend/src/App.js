@@ -6,6 +6,7 @@ import ChatBox from "./components/chatBox/ChatBox";
 import Input from "./components/input/input";
 import ChatList from "./components/chatList/chatList";
 import AddContact from "./components/addContact/addContat";
+import AuthPopup from "./components/authPopup";
 
 class App extends Component {
   constructor(props) {
@@ -13,7 +14,10 @@ class App extends Component {
     this.state = {
       messages: [],
       peerId: "",
-      roomList: []
+      roomList: [],
+      authPopup: false,
+      authQuestion: "",
+      origin: ""
     };
   }
 
@@ -71,8 +75,9 @@ class App extends Component {
 
   messageHandler = (origin, text, room, authenticated, authQuestion) => {
     if (authQuestion !== "") {
+      //Handle auth question popup
       console.log("AuthQuestion received");
-      //Handle auth question
+      this.openAuthPopup(authQuestion, origin);
     } else {
       var msg = {
         origin: origin,
@@ -85,6 +90,22 @@ class App extends Component {
       }));
       this.addRoom(room, authenticated);
     }
+  };
+
+  openAuthPopup = (authQuestion, origin) => {
+    this.setState({
+      authPopup: true,
+      authQuestion: authQuestion,
+      origin: origin
+    });
+  };
+
+  closeAuthPopup = () => {
+    this.setState({
+      authPopup: false,
+      authQuestion: "",
+      origin: ""
+    });
   };
 
   render() {
@@ -109,10 +130,16 @@ class App extends Component {
             id={this.state.peerId}
             currentRoom={this.state.currentRoom}
           />
+          <AuthPopup
+            peerID={this.state.origin}
+            authQuestion={this.state.authQuestion}
+            open={this.state.authPopup}
+          />
           <footer className="chat-footer">
             <Input send={this.send} />
           </footer>
         </section>
+        ;
       </div>
     );
   }

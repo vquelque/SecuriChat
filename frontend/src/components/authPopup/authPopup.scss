@@ -1,0 +1,40 @@
+.Drawer {
+  background-color: #d50152;
+  border-radius: 4px;
+  color: white;
+  border: 0;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.25s linear;
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.DrawerCard {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 40px auto;
+  @media (min-width: 768px) {
+    border-radius: 0;
+  }
+  button {
+    margin-top: 50px;
+  }
+}
+
+.Modal {
+  position: absolute;
+  top: 30px;
+  background-color: white;
+  width: 100%;
+  max-width: 700px;
+  min-height: 100%;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
