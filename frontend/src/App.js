@@ -51,10 +51,20 @@ class App extends Component {
       authenticated: authenticated
     };
     console.log("adding room " + id);
-    if (!roomAlreadyPresent(room, this.state.roomList)) {
+    let roomIndex = roomAlreadyPresent(room, this.state.roomList);
+    if (roomIndex === -1) {
       this.setState(() => ({
         roomList: [...this.state.roomList, room]
       }));
+    } else {
+      console.log(roomIndex);
+      if (this.state.roomList[roomIndex]["authenticated"] !== authenticated) {
+        this.setState(prevState => {
+          let nRoomList = Object.assign({}, prevState.roomList);
+          nRoomList[roomIndex].authenticated = authenticated;
+          return { nRoomList };
+        });
+      }
     }
   };
 
@@ -157,9 +167,12 @@ class App extends Component {
 export default App;
 
 function roomAlreadyPresent(room, roomList) {
+  let index = -1;
   for (var i = 0; i < roomList.length; i++) {
     if (roomList[i].id === room.id) {
-      return true;
+      index = i;
+      break;
     }
   }
+  return index;
 }
