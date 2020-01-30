@@ -31,6 +31,7 @@ func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 	for {
 		// read in a message
 		cliMsg := &message.Message{}
+		cliMsg.Encrypted = true
 		err := conn.ReadJSON(cliMsg)
 		if err != nil {
 			log.Println(err)
@@ -44,9 +45,14 @@ func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 		case cliMsg.AuthQuestion != "" && cliMsg.AuthAnswer != "" && cliMsg.Room != "":
 			log.Println("WEBUI : Clients wants to add a peer with auth.")
 			// client wants to add a contact. Room is the peerID.
+			cliMsg.Encrypted = true
+			cliMsg.Destination = cliMsg.Room
+			go gsp.ProcessClientMessage(cliMsg)
 		case cliMsg.AuthAnswer != "" && cliMsg.Room != "":
 			log.Println("WEBUI : Clients wants to send auth answer to peer")
 			// client wants to add a contact. Room is the peerID.
+			cliMsg.Destination = cliMsg.Room
+			go gsp.ProcessClientMessage(cliMsg)
 		default:
 			log.Println("WEBUI : No action registered for this Client Message")
 		}
