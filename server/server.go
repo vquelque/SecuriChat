@@ -130,5 +130,8 @@ func setupRoutes(gsp *gossiper.Gossiper) {
 func StartReactServer(gsp *gossiper.Gossiper) {
 	fmt.Println("Running SecuriChat websocket server")
 	setupRoutes(gsp)
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
