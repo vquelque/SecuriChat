@@ -57,7 +57,7 @@ func (gsp *Gossiper) ProcessClientMessage(msg *message.Message) {
 					fmt.Printf("Requested authentication with question %s and answer %s", msg.AuthQuestion, msg.AuthAnswer)
 					cs, ok := gsp.createOrLoadConversationState(msg.Destination)
 					if !ok {
-						log.Panic("convo didn't exist")
+						log.Panic("conversation didn't exist ", msg.Destination, " was requested")
 					}
 					toSend, err := cs.Conversation.StartAuthenticate(msg.AuthQuestion, []byte(msg.AuthAnswer))
 					if err != nil {
