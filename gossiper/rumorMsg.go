@@ -137,27 +137,39 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			go gsp.sendBufferedEncrRumors(cs, msg)
 		case encConversation.AkeFinished, encConversation.AuthenticationOK:
 			// A message was received
+			if string(plaintxt) == "" {
+				fmt.Println("empty message")
+				return
+			}
 			msgType := " AUTHENTICATED "
 			if encConversation.AkeFinished == cs.Step {
 				msgType = " UNAUTHENTICATED "
 			}
 			fmt.Printf("RECEIVED %s ENCR MESSAGE : \n %s \n ", msgType, plaintxt)
 		case encConversation.SMP1:
-			log.Println("state is : ", cs.Step)
-			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
+			fmt.Println("state is : ", cs.Step)
+			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)
 			cs.Step = encryptedMessage.Step + 1
-			secret := gsp.getSecretFromClient(msg.Origin, cs)
-			toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
-			if err != nil {
-				log.Panic(err.Error())
-			}
-			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
+			go gsp.getAndSendSecretFromClient(msg.Origin, cs)
+
+			//gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 		case encConversation.SMP2, encConversation.SMP3, encConversation.SMP4:
-			log.Println("state is : ", cs.Step)
-			log.Printf("Doing SMP Protocol, step %d \n", encryptedMessage.Step+1)
+			fmt.Println("state is : ", cs.Step)
+			fmt.Printf("Doing SMP Protocol, step %d with %s \n", encryptedMessage.Step+1, msg.Origin)
 			cs.Step = encryptedMessage.Step + 1
+			if encryptedMessage.Step == encConversation.SMP4 || cs.Step == encConversation.SMP4 {
+				cs.Step = encConversation.AuthenticationOK
+				return
+			}
 			log.Println("state final is : ", cs.Step)
-			gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
+			encMsg := &message.EncryptedMessage{
+				Message: toSend[0],
+				Step:    cs.Step,
+				Dest:    "",
+			}
+			pub := gsp.RSAPeers.GetPeerPublicKey(msg.Origin)
+			gsp.sendRSAKeyExchangeMessage(encMsg, pub)
+			//gsp.sendEncryptedMessage(toSend[0], cs, msg.Origin)
 
 		}
 	} else {
@@ -165,15 +177,27 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	}
 }
 
-func (gsp *Gossiper) getSecretFromClient(origin string, cs *encConversation.ConversationState) string {
+func (gsp *Gossiper) getAndSendSecretFromClient(origin string, cs *encConversation.ConversationState) string {
 	question, _ := cs.Conversation.SMPQuestion()
 	cliMsg := &message.Message{
 		Origin:       origin,
 		AuthQuestion: question,
 	}
-	gsp.sendAuthQuestionToUi(cliMsg)
+	go gsp.sendAuthQuestionToUi(cliMsg)
 	fmt.Printf("Waiting client answer for the question %s : \n", question)
 	secret := <-cs.AnswerChan
+	fmt.Printf("Answer is %s", secret)
+	toSend, err := cs.Conversation.ProvideAuthenticationSecret([]byte(secret))
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	encMsg := &message.EncryptedMessage{
+		Message: toSend[0],
+		Step:    cs.Step,
+		Dest:    "",
+	}
+	pub := gsp.RSAPeers.GetPeerPublicKey(origin)
+	gsp.sendRSAKeyExchangeMessage(encMsg, pub)
 	return secret
 }
 

@@ -49,7 +49,6 @@ func GenerateRSAKeypair() (priv *rsa.PrivateKey, pub *rsa.PublicKey) {
 	if err != nil {
 		log.Fatal("Error generating the RSA keypair")
 	}
-	PrintPublicKey(&private.PublicKey)
 	return private, &private.PublicKey
 }
 
