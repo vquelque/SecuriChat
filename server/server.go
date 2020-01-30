@@ -43,7 +43,7 @@ func ReadUIMessage(conn *websocket.Conn, gsp *gossiper.Gossiper) {
 			go gsp.ProcessClientMessage(cliMsg)
 			gsp.UIMessages <- cliMsg
 		case cliMsg.Room != "":
-			cliMsg.Text = "hello !"
+			cliMsg.Text = ""
 			cliMsg.Destination = cliMsg.Room
 			go gsp.ProcessClientMessage(cliMsg)
 			gsp.UIMessages <- cliMsg
@@ -127,7 +127,7 @@ func setupRoutes(gsp *gossiper.Gossiper) {
 	http.HandleFunc("/init", initHandler(gsp))
 }
 
-func StartReactServer(gsp *gossiper.Gossiper) {
+func StartReactServer(gsp *gossiper.Gossiper, port int) {
 	fmt.Println("Running SecuriChat websocket server")
 	setupRoutes(gsp)
 	http.ListenAndServe(":8080", nil)
