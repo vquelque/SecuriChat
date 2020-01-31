@@ -2,13 +2,14 @@ package gossiper
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/vquelque/SecuriChat/crypto"
 	"github.com/vquelque/SecuriChat/message"
 	"log"
 )
 
 func (gsp *Gossiper) handleRSAEncryptedMessage(rumor *message.RumorMessage) {
-	log.Println("Handling RSA msg from", rumor.Origin)
+	//log.Println("Handling RSA msg from", rumor.Origin)
 	if !gsp.RSAPeers.Contains(rumor.Origin) {
 		log.Println("Origin isn't known by the gossiper")
 		return
@@ -31,6 +32,6 @@ func (gsp *Gossiper) handleRSAEncryptedMessage(rumor *message.RumorMessage) {
 		return
 	}
 
-	log.Printf("successfully decrypted RSA encrypted message. Starting key exchange. \n")
+	fmt.Printf("successfully decrypted RSA encrypted message. Starting key exchange. \n")
 	gsp.handleEncryptedMessage(rumor)
 }

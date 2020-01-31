@@ -18,6 +18,7 @@ func (d DebugSMPEventHandler) HandleSMPEvent(event otr3.SMPEvent, progressPercen
 	if event.String() == "SMPEventAbort" {
 		log.Println("Warning, error with SMP Protocol, conversation will be destroyed")
 		d.convStateMap.DestroyConversation(d.dest)
+		//TODO send popup
 	}
 }
 

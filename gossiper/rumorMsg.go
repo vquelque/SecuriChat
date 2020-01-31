@@ -20,9 +20,6 @@ import (
 
 // Processes incoming rumor message.
 func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender string) {
-
-	log.Println("rumor received")
-
 	next := gsp.VectorClock.NextMessageForPeer(msg.Origin)
 	if sender != "" && msg.ID >= next && msg.Origin != gsp.Name {
 		gsp.Routing.UpdateRoute(msg, sender) //update routing table
@@ -51,7 +48,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 			if msg.Origin != gsp.Name {
 				if msg.ID == 1 {
 					gsp.parseAndStoreRSAPublicKey(msg.Text, msg.Origin)
-					log.Println("sending pub key")
+					//log.Println("sending pub key")
 					gsp.sendRumor(sender, msg)
 					return
 				}
@@ -68,7 +65,7 @@ func (gsp *Gossiper) processRumorMessage(msg *message.RumorMessage, sender strin
 			}
 		}
 		//pick random peer and rumormonger
-		log.Println("sending message")
+		//log.Println("sending message")
 		gsp.sendRumor(sender, msg)
 	}
 
@@ -88,9 +85,9 @@ func (gsp *Gossiper) sendRumor(sender string, msg *message.RumorMessage) {
 func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 	encryptedMessage := msg.EncryptedMessage
 	if encryptedMessage != nil {
-		log.Println("handling enc msg")
+		//log.Println("handling enc msg")
 		if encryptedMessage.Dest != gsp.Name {
-			log.Println("Recived encrypted OTR message, might not be for me")
+			//log.Println("Recived encrypted OTR message, might not be for me")
 			//return
 		}
 		//Get conversation
@@ -111,10 +108,10 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 		switch encryptedMessage.Step {
 		case encConversation.QueryMsg, encConversation.DHCommit,
 			encConversation.DHKey, encConversation.RevealSig:
-			log.Println("state is : ", cs.Step)
-			log.Printf("Doing key exchange, step %d \n", encryptedMessage.Step+1)
+			//log.Println("state is : ", cs.Step)
+			fmt.Printf("Doing key exchange, step %d \n", encryptedMessage.Step+1)
 			cs.Step = encryptedMessage.Step + 1
-			log.Println("state final is : ", cs.Step)
+			//log.Println("state final is : ", cs.Step)
 			if toSend != nil {
 				encMsg := &message.EncryptedMessage{
 					Message: toSend[0],
@@ -126,14 +123,14 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 			}
 
 			if cs.Step == encConversation.Sig {
-				log.Println("Key exchange is finished")
+				fmt.Println("Key exchange is finished")
 				cs.Step = encConversation.AkeFinished
 				go gsp.sendBufferedEncrRumors(cs, msg)
 				go gsp.sendQuestion(cs, msg.Origin)
 
 			}
 		case encConversation.Sig:
-			log.Println("Key exchange is finished")
+			fmt.Println("Key exchange is finished")
 			cs.Step = encConversation.AkeFinished
 			go gsp.sendBufferedEncrRumors(cs, msg)
 			go gsp.sendQuestion(cs, msg.Origin)
@@ -165,7 +162,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 				return
 			}
 			cs.Step = encryptedMessage.Step + 1
-			log.Println("state final is : ", cs.Step)
+			//log.Println("state final is : ", cs.Step)
 			encMsg := &message.EncryptedMessage{
 				Message: toSend[0],
 				Step:    cs.Step,
@@ -182,7 +179,7 @@ func (gsp *Gossiper) handleEncryptedMessage(msg *message.RumorMessage) {
 
 		}
 	} else {
-		log.Println("rumor message")
+		//log.Println("rumor message")
 	}
 }
 
